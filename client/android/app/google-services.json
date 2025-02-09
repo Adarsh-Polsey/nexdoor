@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "636125235809",
+    "firebase_url": "https://projectnex-472c3-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "projectnex-472c3",
+    "storage_bucket": "projectnex-472c3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:636125235809:android:80072960416c57f805f820",
+        "android_client_info": {
+          "package_name": "com.example.nexdoor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAP20oxx2jPaQRP-7n7f0dAk2-6y5as-xE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
