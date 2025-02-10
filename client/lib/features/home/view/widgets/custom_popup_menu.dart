@@ -45,7 +45,7 @@ class _CustomPopupMenuState extends State<CustomPopupMenu> {
                 }).toList();
               },
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey.shade400),
                   borderRadius: BorderRadius.circular(12),

@@ -29,14 +29,14 @@ class AppTheme {
     // Input Decoration Theme
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: ColorPalette.textFieldBackground,
+      fillColor: ColorPalette.secondaryColor.withAlpha(10),
       focusColor: ColorPalette.textFieldFocusedBorder,
       hoverColor: ColorPalette.textFieldBackground.withValues(alpha:0.8),
       
       // Border styling
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: ColorPalette.textFieldBorder),
+        borderSide: BorderSide(color: ColorPalette.primaryButtonSplash),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
@@ -134,7 +134,7 @@ class AppTheme {
     appBarTheme: AppBarTheme(
       backgroundColor: ColorPalette.surfaceColor,
       foregroundColor: ColorPalette.primaryText,
-      elevation: 0,
+      elevation: 1,
       iconTheme: IconThemeData(color: ColorPalette.primaryText),
       actionsIconTheme: IconThemeData(color: ColorPalette.accentColor),
       centerTitle: true,

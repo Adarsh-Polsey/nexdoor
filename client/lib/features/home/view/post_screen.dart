@@ -73,7 +73,7 @@ class _PostScreenState extends State<PostScreen> {
                 mainAxisSpacing: 20,
                 mainAxisExtent: 260),
             itemBuilder: (context, index) => _postCard(),
-            itemCount: 5,
+            itemCount: 20,
             shrinkWrap: true,
             scrollDirection: Axis.vertical,
           ),

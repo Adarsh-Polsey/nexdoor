@@ -40,7 +40,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
       padding: widget.padding,
       margin: widget.margin,
       child: TextField(
-        cursorColor: color.inversePrimary,
         textInputAction: widget.textInputAction ?? TextInputAction.next,
         readOnly: !widget.editMode,
         controller: widget.controller,
@@ -55,8 +54,14 @@ class _CustomTextFieldState extends State<CustomTextField> {
                     });
                   },
                   icon: widget.isobscure
-                      ?  Icon(Icons.remove_red_eye_outlined,color: color.inversePrimary,)
-                      :  Icon(Icons.remove_red_eye_sharp,color: color.inversePrimary,))
+                      ? Icon(
+                          Icons.remove_red_eye_outlined,
+                          color: color.inversePrimary,
+                        )
+                      : Icon(
+                          Icons.remove_red_eye_sharp,
+                          color: color.inversePrimary,
+                        ))
               : const SizedBox.shrink(),
           prefixIcon: widget.icon,
           prefixIconColor: color.inversePrimary,
@@ -64,24 +69,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           labelStyle: TextStyle(color: color.inversePrimary, fontSize: 20),
           hintText: widget.hinttext,
           hintStyle: TextStyle(
-              fontWeight: FontWeight.w200,
-              color: color.inversePrimary.withValues(alpha:0.4)),
-          enabledBorder: widget.enableBorder
-              ? OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: color.inversePrimary))
-              : InputBorder.none,
-          focusedBorder: widget.enableBorder
-              ? OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                      color: Theme.of(context).colorScheme.secondary))
-              : InputBorder.none,disabledBorder: widget.enableBorder
-              ? OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                      color: Theme.of(context).colorScheme.secondary))
-              : InputBorder.none,
+              fontWeight: FontWeight.w200),
         ),
       ),
     );
