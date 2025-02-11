@@ -115,9 +115,6 @@ class _EditUserWidgetState extends State<EditUserWidget> {
       UserDataService us = UserDataService();
       UserModel currentUserInfo = await us.fetchCurrentUserInfo();
       name = currentUserInfo.name ?? "";
-      bio = currentUserInfo.bio ?? "";
-      programme = currentUserInfo.programme ?? "";
-      passingYear = currentUserInfo.passingYear ?? "";
       return currentUserInfo;
     } catch (e, s) {
       errorNotifier("fetchuserInfo()", e, s);

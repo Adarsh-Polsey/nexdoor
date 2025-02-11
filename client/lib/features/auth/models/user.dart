@@ -3,63 +3,63 @@ class UserModel {
   final String? imageUrl;
   final String? name;
   final String? email;
-  final String? bio;
-  final String? programme;
-  final String? passingYear;
-  final bool isTeacher;
+  final String? phoneNumber;
+  final String? location; // City, Country (Optional)
   final bool isVerified;
-  final bool isProfileCompleted;
-  final bool isSuperUser;
-  final bool isAdmin;
+  final bool isActive;
+  final List<String> savedBusinesses;
+  final List<String> likedBusinesses;
+  final List<String> followedCategories;
+  final List<String> likedOffers;
 
   UserModel({
     this.uid,
+    this.imageUrl,
     this.name,
     this.email,
-    this.bio,
-    this.programme,
-    this.imageUrl,
-    this.passingYear,
-    this.isTeacher = false,
+    this.phoneNumber,
+    this.location,
     this.isVerified = false,
-    this.isProfileCompleted = false,
-    this.isSuperUser = false,
-    this.isAdmin = false,
+    this.isActive = true,
+    this.savedBusinesses = const [],
+    this.likedBusinesses = const [],
+    this.followedCategories = const [],
+    this.likedOffers = const [],
   });
 
-  // Convert User to a Map (for Firestore or other storage)
+  // Convert UserModel to a Map for Firestore or JSON
   Map<String, dynamic> toMap() {
     return {
       'uid': uid,
+      'imageUrl': imageUrl,
       'name': name,
       'email': email,
-      'programme': programme,
-      'passingYear': passingYear,
-      'bio': bio,
-      'imageUrl':imageUrl,
-      'isTeacher': isTeacher,
+      'phoneNumber': phoneNumber,
+      'location': location,
       'isVerified': isVerified,
-      'isProfileCompleted': isProfileCompleted,
-      'isSuperUser': isSuperUser,
-      'isAdmin': isAdmin,
+      'isActive': isActive,
+      'savedBusinesses': savedBusinesses,
+      'likedBusinesses': likedBusinesses,
+      'followedCategories': followedCategories,
+      'likedOffers': likedOffers,
     };
   }
 
-  // Create a User from a Map (usually from Firestore)
+  // Create a UserModel from a Map (Firestore or JSON)
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      bio: map['bio'],
       uid: map['uid'],
+      imageUrl: map['imageUrl'],
       name: map['name'],
       email: map['email'],
-      programme: map['programme'],
-      passingYear: map['passingYear'],
-      imageUrl: map['imageUrl'],
-      isTeacher: (map['isTeacher'] ?? false) as bool,
-      isVerified: (map['isVerified'] ?? false) as bool,
-      isProfileCompleted: (map['isProfileCompleted'] ?? false) as bool,
-      isSuperUser: (map['isSuperUser'] ?? false) as bool,
-      isAdmin: (map['isAdmin'] ?? false) as bool,
+      phoneNumber: map['phoneNumber'],
+      location: map['location'],
+      isVerified: map['isVerified'] ?? false,
+      isActive: map['isActive'] ?? true,
+      savedBusinesses: List<String>.from(map['savedBusinesses'] ?? []),
+      likedBusinesses: List<String>.from(map['likedBusinesses'] ?? []),
+      followedCategories: List<String>.from(map['followedCategories'] ?? []),
+      likedOffers: List<String>.from(map['likedOffers'] ?? []),
     );
   }
 }

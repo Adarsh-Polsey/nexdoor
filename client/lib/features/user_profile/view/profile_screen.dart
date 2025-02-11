@@ -222,37 +222,6 @@ class _CurrentUserProfileSectionState extends State<CurrentUserProfileSection> {
                     color: color.inversePrimary.withValues(alpha:0.6),
                     fontSize: 15)),
           ),
-          Visibility(
-            visible: currentUserInfo.bio != null && currentUserInfo.bio != "",
-            child: Text(currentUserInfo.bio ?? "",
-                textAlign: isMobile ? TextAlign.center : null,
-                style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 15,
-                    color: color.inversePrimary.withValues(alpha:0.6))),
-          ),
-          Visibility(
-            visible: (currentUserInfo.programme != null &&
-                currentUserInfo.programme != ""),
-            child: Text(
-                textAlign: isMobile ? TextAlign.center : null,
-                currentUserInfo.programme ?? "",
-                style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 15,
-                    color: color.inversePrimary.withValues(alpha:0.6))),
-          ),
-          Visibility(
-            visible: (currentUserInfo.passingYear != null &&
-                currentUserInfo.passingYear != ""),
-            child: Text(
-                textAlign: isMobile ? TextAlign.center : null,
-                currentUserInfo.passingYear ?? "",
-                style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 15,
-                    color: color.inversePrimary.withValues(alpha:0.6))),
-          ),
         ],
       ),
       (isMobile ? const SizedBox(height: 5) : const SizedBox(width: 30)),

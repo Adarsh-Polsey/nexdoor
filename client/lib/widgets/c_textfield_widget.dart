@@ -1,6 +1,8 @@
 // Custom_TextField
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:nexdoor/core/theme/color_pallete.dart';
 
 // ignore: must_be_immutable
 class CustomTextField extends StatefulWidget {
@@ -16,7 +18,7 @@ class CustomTextField extends StatefulWidget {
       this.margin = const EdgeInsets.all(0),
       this.isobscure = false,
       this.editMode = true,
-      this.enableBorder = true});
+      this.enableBorder = true, this.keyboardType, this.maxLength});
   final String labeltext;
   final String hinttext;
   bool isPassword;
@@ -28,6 +30,8 @@ class CustomTextField extends StatefulWidget {
   final Icon? icon;
   final EdgeInsets padding;
   final EdgeInsets margin;
+  final TextInputType? keyboardType;
+  final int? maxLength;
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
 }
@@ -35,11 +39,13 @@ class CustomTextField extends StatefulWidget {
 class _CustomTextFieldState extends State<CustomTextField> {
   @override
   Widget build(BuildContext context) {
-    ColorScheme color = Theme.of(context).colorScheme;
     return Container(
       padding: widget.padding,
       margin: widget.margin,
       child: TextField(
+        maxLength: widget.maxLength,
+        maxLengthEnforcement:MaxLengthEnforcement.enforced,
+        keyboardType: widget.keyboardType,
         textInputAction: widget.textInputAction ?? TextInputAction.next,
         readOnly: !widget.editMode,
         controller: widget.controller,
@@ -56,20 +62,17 @@ class _CustomTextFieldState extends State<CustomTextField> {
                   icon: widget.isobscure
                       ? Icon(
                           Icons.remove_red_eye_outlined,
-                          color: color.inversePrimary,
                         )
                       : Icon(
                           Icons.remove_red_eye_sharp,
-                          color: color.inversePrimary,
                         ))
               : const SizedBox.shrink(),
           prefixIcon: widget.icon,
-          prefixIconColor: color.inversePrimary,
           labelText: widget.labeltext,
-          labelStyle: TextStyle(color: color.inversePrimary, fontSize: 20),
+          labelStyle: TextStyle( fontSize: 20),
           hintText: widget.hinttext,
-          hintStyle: TextStyle(
-              fontWeight: FontWeight.w200),
+          hintStyle: TextStyle(fontSize: 14,
+              fontWeight: FontWeight.w100,color: ColorPalette.accentColor.withAlpha(100)),
         ),
       ),
     );

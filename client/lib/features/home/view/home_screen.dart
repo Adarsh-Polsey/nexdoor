@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: IconButton(
                   color: ColorPalette.primaryButtonHover,
                   icon: Icon(
-                    Icons.face_outlined,
+                    Icons.notifications_outlined,
                     color: ColorPalette.primaryButtonSplash,
                   ),
                   onPressed: () {

@@ -74,7 +74,6 @@ TextEditingController emailController = TextEditingController();
   }
   @override
   Widget build(BuildContext context) {
-    ColorScheme color = Theme.of(context).colorScheme;
     return  Container(
             padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
             margin: widget.isDesktop
@@ -148,13 +147,11 @@ TextEditingController emailController = TextEditingController();
                   child: RichText(
                       text: TextSpan(
                           text: "Don't have an account? ",
-                          style: TextStyle(color: color.inversePrimary),
                           children: [
                         TextSpan(
                             text: "Register now",
                             style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: color.inversePrimary))
+                                fontWeight: FontWeight.w600))
                       ])),
                 ),
               ],

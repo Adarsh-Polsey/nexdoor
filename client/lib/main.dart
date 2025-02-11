@@ -26,12 +26,12 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routes: {
         '/': (context) => LoginScreen(),
-        '/home': (context) => HomeScreen(),
         '/signup': (context) => SignUpScreen(),
+        '/home': (context) => HomeScreen(),
         '/profile': (context) => ProfileScreen(),
         '/edit': (context) => EditUserScreen(),
       },
-      initialRoute: '/home',
+      initialRoute: '/',
     );
   }
 }

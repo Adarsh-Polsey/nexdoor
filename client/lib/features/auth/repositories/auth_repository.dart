@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nexdoor/core/theme/color_pallete.dart';
+import 'package:nexdoor/features/auth/models/user.dart';
 import 'package:nexdoor/features/user_profile/repositories/user_repository.dart';
 import 'package:toastification/toastification.dart';
 
@@ -36,11 +37,11 @@ class AuthService {
   }
 
 //Sign up
-  Future<bool> signUp(String email, String pass) async {
+  Future<bool> signUp(String email, String pass,UserModel user) async {
     try {
       await _auth.createUserWithEmailAndPassword(email: email, password: pass);
       UserDataService us = UserDataService();
-      bool status = await us.addUser();
+      bool status = await us.addUser(user: user);
       notifier("Welcome $email", isSuccess: status);
       return status;
       // userCredential.user?.sendEmailVerification();

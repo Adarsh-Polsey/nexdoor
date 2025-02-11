@@ -13,14 +13,19 @@ class UserDataService {
   Future<bool> addUser({UserModel? user}) async {
     try {
       UserModel currentUser = UserModel(
-          uid: _auth.currentUser!.uid,
-          name: user?.name,
-          email: _auth.currentUser!.email,
-          bio: user?.bio,
-          programme: user?.programme,
-          passingYear: user?.passingYear,
-          isProfileCompleted: user?.isProfileCompleted ?? false,
-          isVerified: _auth.currentUser!.emailVerified);
+        uid: _auth.currentUser?.uid,
+        imageUrl: user?.imageUrl ?? '',
+        name: user?.name ?? '',
+        email: _auth.currentUser?.email ?? '',
+        phoneNumber: user?.phoneNumber ?? '',
+        location: user?.location ?? '',
+        isVerified: _auth.currentUser?.emailVerified ?? false,
+        isActive: true,
+        savedBusinesses: user?.savedBusinesses ?? [],
+        likedBusinesses: user?.likedBusinesses ?? [],
+        followedCategories: user?.followedCategories ?? [],
+        likedOffers: user?.likedOffers ?? [],
+      );
       final userDoc = currentUser.toMap();
       String userId = _auth.currentUser!.uid;
       await _db.collection('users').doc(userId).set(userDoc);
@@ -93,7 +98,6 @@ class UserDataService {
     return null;
   }
 
-  
   // Fetch all users
   Future<List> fetchUsers() async {
     List<Map<String, dynamic>> userData = [];
