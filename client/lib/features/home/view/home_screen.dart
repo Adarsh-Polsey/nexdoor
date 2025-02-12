@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: AppBar(
           leading: Padding(
             padding: const EdgeInsets.all(8.0),
-    // LocalEase Logo
+            // LocalEase Logo
             child: Text(
               ' LocalEase',
               style: GoogleFonts.poppins(
@@ -42,12 +42,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           leadingWidth: 200,
-    // Search Bar
+          // Search Bar
           title: Container(
             width: 500,
             height: 40,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
             child: CustomTextField(
               controller: TextEditingController(),
               hinttext: "Search for anything...",
@@ -60,10 +59,13 @@ class _HomeScreenState extends State<HomeScreen> {
           centerTitle: true,
           backgroundColor: Colors.white,
           elevation: 2,
-    // Profile and notifications
+          // Profile and notifications
           actions: [
-            Container(decoration: BoxDecoration(color: Colors.transparent
-            ,border: Border.all(color: ColorPalette.selectionColor),shape: BoxShape.circle),
+            Container(
+              decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  border: Border.all(color: ColorPalette.selectionColor),
+                  shape: BoxShape.circle),
               child: IconButton(
                   color: ColorPalette.primaryButtonHover,
                   icon: Icon(
@@ -71,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: ColorPalette.primaryButtonSplash,
                   ),
                   onPressed: () {
-                    Navigator.pushNamed(context, '/profile');
+                    // Navigator.pushNamed(context, '/profile');
                   }),
             ),
             SizedBox(width: 10)
@@ -88,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: Container(
             width: 500,
-            padding: EdgeInsets.symmetric(horizontal: 30,vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
             decoration: BoxDecoration(
               color: Colors.white,
               border:
