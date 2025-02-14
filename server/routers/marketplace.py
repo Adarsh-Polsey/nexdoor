@@ -8,30 +8,39 @@ from database import get_db
 
 router = APIRouter()
 
-@router.post("/create_marketplace_item")
-def create_marketplace_item(item: schemas.MarketplaceItemCreate, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
-    db_item = models.MarketplaceItem(**item.dict())
+# ✅ Create Marketplace Item
+@router.post("/create_marketplace_item", response_model=schemas.MarketplaceItem)
+def create_marketplace_item(
+    item: schemas.MarketplaceItemCreate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user)
+):
+    """Creates a new marketplace item associated with the logged-in seller."""
+    db_item = models.MarketplaceItem(**item.dict(), seller_id=user.id)
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
     return db_item
 
-@router.get("/list_marketplace_items")
+# ✅ List Marketplace Items (With Filters)
+@router.get("/list_marketplace_items", response_model=List[schemas.MarketplaceItem])
 def list_marketplace_items(
     skip: int = 0,
     limit: int = 100,
     seller_id: Optional[str] = None,
     condition: Optional[schemas.ItemCondition] = None,
     search: Optional[str] = None,
-    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user)
 ):
+    """Fetches marketplace items with optional seller and condition filters."""
     query = db.query(models.MarketplaceItem)
-    
+
     if seller_id:
         query = query.filter(models.MarketplaceItem.seller_id == seller_id)
     if condition:
         query = query.filter(models.MarketplaceItem.condition == condition)
-    
+
     if search:
         search = search.strip()
         query = query.filter(
@@ -40,54 +49,84 @@ def list_marketplace_items(
                 func.similarity(models.MarketplaceItem.description, search) > 0.3
             )
         ).order_by(func.similarity(models.MarketplaceItem.title, search).desc())
-    
-    items = query.offset(skip).limit(limit).all()
-    return items
 
-@router.get("/get_marketplace_item/{item_id}")
-def get_marketplace_item(item_id: str, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
+    return query.offset(skip).limit(limit).all()
+
+# ✅ Get Marketplace Item by ID
+@router.get("/get_marketplace_item/{item_id}", response_model=schemas.MarketplaceItem)
+def get_marketplace_item(
+    item_id: str,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user)
+):
+    """Retrieves a marketplace item by ID."""
     item = db.query(models.MarketplaceItem).filter(models.MarketplaceItem.id == item_id).first()
-    if item is None:
+
+    if not item:
         raise HTTPException(status_code=404, detail="Marketplace item not found")
+
     return item
 
-@router.post("/update_marketplace_item/{item_id}")
+# ✅ Update Marketplace Item (Only Seller Can Update)
+@router.put("/update_marketplace_item/{item_id}", response_model=schemas.MarketplaceItem)
 def update_marketplace_item(
     item_id: str,
-    item: schemas.MarketplaceItemCreate,
-    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
+    item_update: schemas.MarketplaceItemCreate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user)
 ):
+    """Allows the seller to update their listed marketplace item."""
     db_item = db.query(models.MarketplaceItem).filter(models.MarketplaceItem.id == item_id).first()
-    if db_item is None:
+
+    if not db_item:
         raise HTTPException(status_code=404, detail="Marketplace item not found")
-    
-    for key, value in item.dict().items():
+
+    if db_item.seller_id != user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to update this item")
+
+    for key, value in item_update.dict().items():
         setattr(db_item, key, value)
-    
+
     db.commit()
     db.refresh(db_item)
     return db_item
 
-@router.post("/mark_item_as_sold/{item_id}")
+# ✅ Mark Item as Sold (Only Seller Can Mark)
+@router.put("/mark_item_as_sold/{item_id}", response_model=schemas.MarketplaceItem)
 def mark_item_as_sold(
     item_id: str,
-    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user)
 ):
+    """Allows the seller to mark an item as sold."""
     item = db.query(models.MarketplaceItem).filter(models.MarketplaceItem.id == item_id).first()
-    if item is None:
+
+    if not item:
         raise HTTPException(status_code=404, detail="Marketplace item not found")
-    
+
+    if item.seller_id != user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to mark this item as sold")
+
     item.is_sold = True
     db.commit()
     db.refresh(item)
     return item
 
-@router.delete("/delete_marketplace_item/{item_id}")
-def delete_marketplace_item(item_id: str, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
+# ✅ Delete Marketplace Item (Only Seller Can Delete)
+@router.delete("/delete_marketplace_item/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_marketplace_item(
+    item_id: str,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user)
+):
+    """Allows the seller to delete their marketplace item."""
     item = db.query(models.MarketplaceItem).filter(models.MarketplaceItem.id == item_id).first()
-    if item is None:
+
+    if not item:
         raise HTTPException(status_code=404, detail="Marketplace item not found")
-    
+
+    if item.seller_id != user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this item")
+
     db.delete(item)
     db.commit()
-    return None
