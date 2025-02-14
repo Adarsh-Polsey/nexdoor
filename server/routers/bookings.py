@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
+from routers.auth import get_current_user
 import models, schemas
 from database import get_db
 
 router = APIRouter()
 
 @router.post("/create_booking")
-def create_booking(booking: schemas.BookingCreate, db: Session = Depends(get_db)):
+def create_booking(booking: schemas.BookingCreate, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     db_booking = models.Booking(**booking.dict())
     db.add(db_booking)
     db.commit()
@@ -20,7 +21,7 @@ def list_bookings(
     limit: int = 100,
     user_id: str = None,
     service_id: str = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
 ):
     query = db.query(models.Booking)
     if user_id:
@@ -31,7 +32,7 @@ def list_bookings(
     return bookings
 
 @router.get("/get_booking/{booking_id}")
-def get_booking(booking_id: str, db: Session = Depends(get_db)):
+def get_booking(booking_id: str, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
     if booking is None:
         raise HTTPException(status_code=404, detail="Booking not found")
@@ -41,7 +42,7 @@ def get_booking(booking_id: str, db: Session = Depends(get_db)):
 def update_booking(
     booking_id: str,
     booking: schemas.BookingCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
 ):
     db_booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
     if db_booking is None:
@@ -58,7 +59,7 @@ def update_booking(
 def update_booking_status(
     booking_id: str,
     status: schemas.BookingStatus,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
 ):
     booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
     if booking is None:
@@ -70,7 +71,7 @@ def update_booking_status(
     return booking
 
 @router.post("/delete_booking/{booking_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_booking(booking_id: str, db: Session = Depends(get_db)):
+def delete_booking(booking_id: str, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
     if booking is None:
         raise HTTPException(status_code=404, detail="Booking not found")

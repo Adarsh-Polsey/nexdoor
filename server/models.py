@@ -1,101 +1,116 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Float, Enum, Text, ARRAY
+from sqlalchemy import (
+    Boolean, Column, ForeignKey, Integer, String, DateTime, Float, Enum, Text, ARRAY
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import uuid
 from database import Base
 
+# ✅ User Model
 class User(Base):
     __tablename__ = "users"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    full_name = Column(String)
-    phone_number = Column(String)
-    location = Column(String)
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    full_name = Column(String, nullable=True)
+    phone_number = Column(String, nullable=True)
+    location = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     is_active = Column(Boolean, default=True)
-    saved_businesses = Column(ARRAY(UUID(as_uuid=True)))
-    liked_products = Column(ARRAY(UUID(as_uuid=True)))
 
-    businesses = relationship("Business", back_populates="owner")
-    bookings = relationship("Booking", back_populates="user")
+    # Relationships
+    businesses = relationship("Business", back_populates="owner", lazy="joined", cascade="all, delete-orphan")
+    bookings = relationship("Booking", back_populates="user", lazy="joined", cascade="all, delete-orphan")
 
+    # Default empty list for saved businesses and liked products
+    saved_businesses = Column(ARRAY(UUID(as_uuid=True)), default=[])
+    liked_products = Column(ARRAY(UUID(as_uuid=True)), default=[])
+
+# ✅ Business Model
 class Business(Base):
     __tablename__ = "businesses"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    name = Column(String, index=True)
-    description = Column(Text)
-    category = Column(String)
-    address = Column(String)
-    phone = Column(String)
-    email = Column(String)
-    website = Column(String)
+    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
+    name = Column(String, index=True, nullable=False)
+    description = Column(Text, nullable=True)
+    category = Column(String, nullable=False)
+    address = Column(String, nullable=False)
+    phone = Column(String, nullable=True)
+    email = Column(String, nullable=True)
+    website = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     allows_delivery = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    owner = relationship("User", back_populates="businesses")
-    services = relationship("Service", back_populates="business")
-    products = relationship("Product", back_populates="business")
+    # Relationships
+    owner = relationship("User", back_populates="businesses", lazy="joined")
+    services = relationship("Service", back_populates="business", lazy="joined", cascade="all, delete-orphan")
+    products = relationship("Product", back_populates="business", lazy="joined", cascade="all, delete-orphan")
 
+# ✅ Service Model
 class Service(Base):
     __tablename__ = "services"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    business_id = Column(UUID(as_uuid=True), ForeignKey("businesses.id"))
-    name = Column(String)
-    description = Column(Text)
-    duration = Column(Integer)
-    price = Column(Float)
+    business_id = Column(UUID(as_uuid=True), ForeignKey("businesses.id", ondelete="CASCADE"))
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    duration = Column(Integer, nullable=False)  # In minutes
+    price = Column(Float, nullable=False)
     is_active = Column(Boolean, default=True)
 
-    business = relationship("Business", back_populates="services")
-    bookings = relationship("Booking", back_populates="service")
+    # Relationships
+    business = relationship("Business", back_populates="services", lazy="joined")
+    bookings = relationship("Booking", back_populates="service", lazy="joined", cascade="all, delete-orphan")
 
+# ✅ Booking Model
 class Booking(Base):
     __tablename__ = "bookings"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    service_id = Column(UUID(as_uuid=True), ForeignKey("services.id"))
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    start_time = Column(DateTime(timezone=True))
-    end_time = Column(DateTime(timezone=True))
-    status = Column(Enum("pending", "confirmed", "cancelled", "completed", name="booking_status"))
+    service_id = Column(UUID(as_uuid=True), ForeignKey("services.id", ondelete="CASCADE"))
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
+    start_time = Column(DateTime(timezone=True), nullable=False)
+    end_time = Column(DateTime(timezone=True), nullable=False)
+    status = Column(Enum("pending", "confirmed", "cancelled", "completed", name="booking_status"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    service = relationship("Service", back_populates="bookings")
-    user = relationship("User", back_populates="bookings")
+    # Relationships
+    service = relationship("Service", back_populates="bookings", lazy="joined")
+    user = relationship("User", back_populates="bookings", lazy="joined")
 
+# ✅ Product Model
 class Product(Base):
     __tablename__ = "products"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    business_id = Column(UUID(as_uuid=True), ForeignKey("businesses.id"))
-    name = Column(String)
-    description = Column(Text)
-    price = Column(Float)
+    business_id = Column(UUID(as_uuid=True), ForeignKey("businesses.id", ondelete="CASCADE"))
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    price = Column(Float, nullable=False)
     stock = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    business = relationship("Business", back_populates="products")
+    # Relationships
+    business = relationship("Business", back_populates="products", lazy="joined")
 
+# ✅ MarketplaceItem Model
 class MarketplaceItem(Base):
     __tablename__ = "marketplace_items"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    seller_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    title = Column(String)
-    description = Column(Text)
-    price = Column(Float)
-    condition = Column(Enum("new", "like_new", "good", "fair", "poor", name="item_condition"))
-    images = Column(ARRAY(String))
+    seller_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
+    title = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    price = Column(Float, nullable=False)
+    condition = Column(Enum("new", "like_new", "good", "fair", "poor", name="item_condition"), nullable=False)
+    images = Column(ARRAY(String), default=[])
     is_sold = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

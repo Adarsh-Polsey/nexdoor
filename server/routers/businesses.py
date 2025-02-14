@@ -2,13 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
 from typing import List, Optional
+from routers.auth import get_current_user
 import models, schemas
 from database import get_db
 
 router = APIRouter()
 
 @router.post("/create_business")
-def create_business(business: schemas.BusinessCreate, db: Session = Depends(get_db)):
+def create_business(business: schemas.BusinessCreate, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     db_business = models.Business(**business.dict())
     db.add(db_business)
     db.commit()
@@ -20,7 +21,7 @@ def list_businesses(
     skip: int = 0,
     limit: int = 100,
     search: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
 ):
     query = db.query(models.Business)
     
@@ -38,7 +39,7 @@ def list_businesses(
     return businesses
 
 @router.get("/get_business/{business_id}")
-def get_business(business_id: str, db: Session = Depends(get_db)):
+def get_business(business_id: str, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     business = db.query(models.Business).filter(models.Business.id == business_id).first()
     if business is None:
         raise HTTPException(status_code=404, detail="Business not found")
@@ -48,7 +49,7 @@ def get_business(business_id: str, db: Session = Depends(get_db)):
 def update_business(
     business_id: str,
     business: schemas.BusinessCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
 ):
     db_business = db.query(models.Business).filter(models.Business.id == business_id).first()
     if db_business is None:
@@ -62,7 +63,7 @@ def update_business(
     return db_business
 
 @router.post("/delete_business/{business_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_business(business_id: str, db: Session = Depends(get_db)):
+def delete_business(business_id: str, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     business = db.query(models.Business).filter(models.Business.id == business_id).first()
     if business is None:
         raise HTTPException(status_code=404, detail="Business not found")

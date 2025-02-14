@@ -2,13 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
 from typing import List, Optional
+from routers.auth import get_current_user
 import models, schemas
 from database import get_db
 
 router = APIRouter()
 
 @router.post("/create_marketplace_item")
-def create_marketplace_item(item: schemas.MarketplaceItemCreate, db: Session = Depends(get_db)):
+def create_marketplace_item(item: schemas.MarketplaceItemCreate, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     db_item = models.MarketplaceItem(**item.dict())
     db.add(db_item)
     db.commit()
@@ -22,7 +23,7 @@ def list_marketplace_items(
     seller_id: Optional[str] = None,
     condition: Optional[schemas.ItemCondition] = None,
     search: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
 ):
     query = db.query(models.MarketplaceItem)
     
@@ -44,7 +45,7 @@ def list_marketplace_items(
     return items
 
 @router.get("/get_marketplace_item/{item_id}")
-def get_marketplace_item(item_id: str, db: Session = Depends(get_db)):
+def get_marketplace_item(item_id: str, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     item = db.query(models.MarketplaceItem).filter(models.MarketplaceItem.id == item_id).first()
     if item is None:
         raise HTTPException(status_code=404, detail="Marketplace item not found")
@@ -54,7 +55,7 @@ def get_marketplace_item(item_id: str, db: Session = Depends(get_db)):
 def update_marketplace_item(
     item_id: str,
     item: schemas.MarketplaceItemCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
 ):
     db_item = db.query(models.MarketplaceItem).filter(models.MarketplaceItem.id == item_id).first()
     if db_item is None:
@@ -70,7 +71,7 @@ def update_marketplace_item(
 @router.post("/mark_item_as_sold/{item_id}")
 def mark_item_as_sold(
     item_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
 ):
     item = db.query(models.MarketplaceItem).filter(models.MarketplaceItem.id == item_id).first()
     if item is None:
@@ -82,7 +83,7 @@ def mark_item_as_sold(
     return item
 
 @router.delete("/delete_marketplace_item/{item_id}")
-def delete_marketplace_item(item_id: str, db: Session = Depends(get_db)):
+def delete_marketplace_item(item_id: str, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     item = db.query(models.MarketplaceItem).filter(models.MarketplaceItem.id == item_id).first()
     if item is None:
         raise HTTPException(status_code=404, detail="Marketplace item not found")

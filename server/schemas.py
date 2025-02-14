@@ -3,6 +3,7 @@ from typing import Optional, List
 from datetime import datetime
 from enum import Enum
 
+# ✅ User Schemas
 class UserBase(BaseModel):
     email: EmailStr
     full_name: Optional[str] = None
@@ -10,7 +11,7 @@ class UserBase(BaseModel):
     location: Optional[str] = None
 
 class UserCreate(UserBase):
-    password: str
+    password: str  # Required for user creation
 
 class User(UserBase):
     id: UUID4
@@ -20,6 +21,7 @@ class User(UserBase):
     class Config:
         from_attributes = True
 
+# ✅ Business Schemas
 class BusinessBase(BaseModel):
     name: str
     description: Optional[str] = None
@@ -31,7 +33,7 @@ class BusinessBase(BaseModel):
     allows_delivery: bool = False
 
 class BusinessCreate(BusinessBase):
-    pass
+    pass  # No extra fields needed for creation
 
 class Business(BusinessBase):
     id: UUID4
@@ -43,10 +45,11 @@ class Business(BusinessBase):
     class Config:
         from_attributes = True
 
+# ✅ Service Schemas
 class ServiceBase(BaseModel):
     name: str
     description: Optional[str] = None
-    duration: int
+    duration: int  # In minutes
     price: float
     is_active: bool = True
 
@@ -60,19 +63,21 @@ class Service(ServiceBase):
     class Config:
         from_attributes = True
 
+# ✅ Booking Status Enum
 class BookingStatus(str, Enum):
     pending = "pending"
     confirmed = "confirmed"
     cancelled = "cancelled"
     completed = "completed"
 
+# ✅ Booking Schemas
 class BookingBase(BaseModel):
     service_id: UUID4
     start_time: datetime
     end_time: datetime
 
 class BookingCreate(BookingBase):
-    pass
+    pass  # No extra fields needed for creation
 
 class Booking(BookingBase):
     id: UUID4
@@ -83,6 +88,7 @@ class Booking(BookingBase):
     class Config:
         from_attributes = True
 
+# ✅ Product Schemas
 class ProductBase(BaseModel):
     name: str
     description: Optional[str] = None
@@ -102,6 +108,7 @@ class Product(ProductBase):
     class Config:
         from_attributes = True
 
+# ✅ Marketplace Item Condition Enum
 class ItemCondition(str, Enum):
     new = "new"
     like_new = "like_new"
@@ -109,6 +116,7 @@ class ItemCondition(str, Enum):
     fair = "fair"
     poor = "poor"
 
+# ✅ Marketplace Item Schemas
 class MarketplaceItemBase(BaseModel):
     title: str
     description: Optional[str] = None
@@ -117,7 +125,7 @@ class MarketplaceItemBase(BaseModel):
     images: List[str] = []
 
 class MarketplaceItemCreate(MarketplaceItemBase):
-    pass
+    pass  # No extra fields needed for creation
 
 class MarketplaceItem(MarketplaceItemBase):
     id: UUID4

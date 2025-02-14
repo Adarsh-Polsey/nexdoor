@@ -2,13 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
 from typing import List, Optional
+from routers.auth import get_current_user
 import models, schemas
 from database import get_db
 
 router = APIRouter()
 
 @router.post("/create_product/")
-def create_product(product: schemas.ProductCreate, db: Session = Depends(get_db)):
+def create_product(product: schemas.ProductCreate, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     db_product = models.Product(**product.dict())
     db.add(db_product)
     db.commit()
@@ -21,7 +22,7 @@ def list_products(
     limit: int = 100,
     business_id: Optional[str] = None,
     search: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
 ):
     query = db.query(models.Product)
     
@@ -41,7 +42,7 @@ def list_products(
     return products
 
 @router.get("/get_product/{product_id}")
-def get_product(product_id: str, db: Session = Depends(get_db)):
+def get_product(product_id: str, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     product = db.query(models.Product).filter(models.Product.id == product_id).first()
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -51,7 +52,7 @@ def get_product(product_id: str, db: Session = Depends(get_db)):
 def update_product(
     product_id: str,
     product: schemas.ProductCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
 ):
     db_product = db.query(models.Product).filter(models.Product.id == product_id).first()
     if db_product is None:
@@ -68,7 +69,7 @@ def update_product(
 def update_product_stock(
     product_id: str,
     stock: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
 ):
     product = db.query(models.Product).filter(models.Product.id == product_id).first()
     if product is None:
@@ -80,7 +81,7 @@ def update_product_stock(
     return product
 
 @router.post("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_product(product_id: str, db: Session = Depends(get_db)):
+def delete_product(product_id: str, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     product = db.query(models.Product).filter(models.Product.id == product_id).first()
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")

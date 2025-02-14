@@ -2,13 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
 from typing import List, Optional
+from routers.auth import get_current_user
 import models, schemas
 from database import get_db
 
 router = APIRouter()
 
 @router.post("/create_service")
-def create_service(service: schemas.ServiceCreate, db: Session = Depends(get_db)):
+def create_service(service: schemas.ServiceCreate, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     db_service = models.Service(**service.model_dump())
     db.add(db_service)
     db.commit()
@@ -21,7 +22,7 @@ def list_services(
     limit: int = 100,
     business_id: Optional[str] = None,
     search: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
 ):
     query = db.query(models.Service)
     
@@ -41,7 +42,7 @@ def list_services(
     return services
 
 @router.get("/get_service/{service_id}")
-def get_service(service_id: str, db: Session = Depends(get_db)):
+def get_service(service_id: str, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     service = db.query(models.Service).filter(models.Service.id == service_id).first()
     if service is None:
         raise HTTPException(status_code=404, detail="Service not found")
@@ -51,7 +52,7 @@ def get_service(service_id: str, db: Session = Depends(get_db)):
 def update_service(
     service_id: str,
     service: schemas.ServiceCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
 ):
     db_service = db.query(models.Service).filter(models.Service.id == service_id).first()
     if db_service is None:
@@ -65,7 +66,7 @@ def update_service(
     return db_service
 
 @router.post("/delete_service/{service_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_service(service_id: str, db: Session = Depends(get_db)):
+def delete_service(service_id: str, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     service = db.query(models.Service).filter(models.Service.id == service_id).first()
     if service is None:
         raise HTTPException(status_code=404, detail="Service not found")
