@@ -4,8 +4,8 @@ import 'package:nexdoor/core/theme/app_theme.dart';
 import 'package:nexdoor/features/auth/view/login_screen.dart';
 import 'package:nexdoor/features/auth/view/signup_screen.dart';
 import 'package:nexdoor/features/home/view/home_screen.dart';
-import 'package:nexdoor/features/user_profile/view/edit_user_screen.dart';
-import 'package:nexdoor/features/user_profile/view/profile_screen.dart';
+import 'package:nexdoor/features/settings_profile/view/edit_user_screen.dart';
+import 'package:nexdoor/features/settings_profile/view/profile_screen.dart';
 import 'package:nexdoor/firebase_options.dart';
 import 'package:toastification/toastification.dart';
 

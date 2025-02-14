@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nexdoor/core/theme/color_pallete.dart';
 import 'package:nexdoor/features/auth/models/user.dart';
-import 'package:nexdoor/features/user_profile/repositories/user_repository.dart';
+import 'package:nexdoor/features/settings_profile/repositories/user_repository.dart';
 import 'package:toastification/toastification.dart';
 
 // Contains Firebase Authentication handling functions and token initialisation

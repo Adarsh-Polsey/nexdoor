@@ -1,0 +1,194 @@
+1. Endpoints
+
+Authentication
+
+Method	Endpoint	Description
+POST	/api/auth/login	Login for access token
+POST	/api/auth/register	Register a new user
+
+Businesses
+
+Method	Endpoint	Description
+POST	/api/businesses/	Create a business
+GET	/api/businesses/	List all businesses
+GET	/api/businesses/{business_id}	Retrieve a specific business
+PUT	/api/businesses/{business_id}	Update a business
+DELETE	/api/businesses/{business_id}	Delete a business
+
+Services
+
+Method	Endpoint	Description
+POST	/api/services/	Create a service
+GET	/api/services/	List all services
+GET	/api/services/{service_id}	Retrieve a specific service
+PUT	/api/services/{service_id}	Update a service
+DELETE	/api/services/{service_id}	Delete a service
+
+Bookings
+
+Method	Endpoint	Description
+POST	/api/bookings/	Create a booking
+GET	/api/bookings/	List all bookings
+GET	/api/bookings/{booking_id}	Retrieve a specific booking
+PUT	/api/bookings/{booking_id}	Update a booking
+DELETE	/api/bookings/{booking_id}	Delete a booking
+PATCH	/api/bookings/{booking_id}/status	Update booking status
+
+Products
+
+Method	Endpoint	Description
+POST	/api/products/	Create a product
+GET	/api/products/	List all products
+GET	/api/products/{product_id}	Retrieve a specific product
+PUT	/api/products/{product_id}	Update a product
+DELETE	/api/products/{product_id}	Delete a product
+PATCH	/api/products/{product_id}/stock	Update product stock
+
+Marketplace
+
+Method	Endpoint	Description
+POST	/api/marketplace/	Create a marketplace item
+GET	/api/marketplace/	List all marketplace items
+GET	/api/marketplace/{item_id}	Retrieve a specific marketplace item
+PUT	/api/marketplace/{item_id}	Update a marketplace item
+DELETE	/api/marketplace/{item_id}	Delete a marketplace item
+PATCH	/api/marketplace/{item_id}/sold	Mark item as sold
+
+Default
+
+Method	Endpoint	Description
+GET	/	Root endpoint
+
+2. Schemas
+
+Authentication Schemas
+
+Body_login_for_access_token_api_auth_login_post
+	•	grant_type: string | null (Allowed: "password" or null)
+	•	username: string
+	•	password: string
+	•	scope: string (Default: "")
+	•	client_id: string | null
+	•	client_secret: string | null
+
+Booking Schemas
+
+Booking
+	•	service_id: string (uuid4)
+	•	start_time: string (date-time)
+	•	end_time: string (date-time)
+	•	id: string (uuid4)
+	•	user_id: string (uuid4)
+	•	status: string (Allowed: "pending", "confirmed", "cancelled", "completed")
+	•	created_at: string (date-time)
+
+BookingCreate
+	•	service_id: string (uuid4)
+	•	start_time: string (date-time)
+	•	end_time: string (date-time)
+	•	BookingStatus: string (Allowed: "pending", "confirmed", "cancelled", "completed")
+
+Business Schemas
+
+Business
+	•	name: string
+	•	description: string | null
+	•	category: string
+	•	address: string
+	•	phone: string | null
+	•	email: string (email) | null
+	•	website: string | null
+	•	allows_delivery: boolean (Default: false)
+	•	id: string (uuid4)
+	•	owner_id: string (uuid4)
+	•	is_active: boolean
+	•	created_at: string (date-time)
+	•	updated_at: string (date-time) | null
+
+BusinessCreate
+	•	name: string
+	•	description: string | null
+	•	category: string
+	•	address: string
+	•	phone: string | null
+	•	email: string (email) | null
+	•	website: string | null
+	•	allows_delivery: boolean (Default: false)
+
+Marketplace Schemas
+
+ItemCondition
+	•	Allowed values: "new", "like_new", "good", "fair", "poor"
+
+MarketplaceItem
+	•	title: string
+	•	description: string | null
+	•	price: number
+	•	condition: string (Allowed: "new", "like_new", "good", "fair", "poor")
+	•	images: array<string> (Default: [])
+	•	id: string (uuid4)
+	•	seller_id: string (uuid4)
+	•	is_sold: boolean
+	•	created_at: string (date-time)
+	•	updated_at: string (date-time) | null
+
+MarketplaceItemCreate
+	•	title: string
+	•	description: string | null
+	•	price: number
+	•	condition: string
+	•	images: array<string> (Default: [])
+
+Product Schemas
+
+Product
+	•	name: string
+	•	description: string | null
+	•	price: number
+	•	stock: integer (Default: 0)
+	•	is_active: boolean (Default: true)
+	•	id: string (uuid4)
+	•	business_id: string (uuid4)
+	•	created_at: string (date-time)
+	•	updated_at: string (date-time) | null
+
+ProductCreate
+	•	name: string
+	•	description: string | null
+	•	price: number
+	•	stock: integer (Default: 0)
+	•	is_active: boolean (Default: true)
+	•	business_id: string (uuid4)
+
+Service Schemas
+
+Service
+	•	name: string
+	•	description: string | null
+	•	duration: integer
+	•	price: number
+	•	is_active: boolean (Default: true)
+	•	id: string (uuid4)
+	•	business_id: string (uuid4)
+
+ServiceCreate
+	•	name: string
+	•	description: string | null
+	•	duration: integer
+	•	price: number
+	•	is_active: boolean (Default: true)
+	•	business_id: string (uuid4)
+
+User Schemas
+
+User
+	•	email: string (email)
+	•	full_name: string | null
+	•	id: string (uuid4)
+	•	is_active: boolean
+	•	created_at: string (date-time)
+
+UserCreate
+	•	email: string (email)
+	•	full_name: string | null
+	•	password: string

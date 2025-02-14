@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:nexdoor/core/theme/color_pallete.dart';
-import 'package:nexdoor/features/home/view/discussion_screen.dart';
-import 'package:nexdoor/features/home/view/chat_screen.dart';
-import 'package:nexdoor/features/home/view/post_screen.dart';
-import 'package:nexdoor/features/home/view/sell_screen.dart';
-import 'package:nexdoor/features/home/view/settings_screen.dart';
+import 'package:nexdoor/features/business/view/discussion_screen.dart';
+import 'package:nexdoor/features/ai_chat/view/ai_chat_screen.dart';
+import 'package:nexdoor/features/business/view/view_businesses_screen.dart';
+import 'package:nexdoor/features/business/view/marketplace.dart';
+import 'package:nexdoor/features/settings_profile/view/settings_screen.dart';
 import 'package:nexdoor/widgets/c_textfield_widget.dart';
 
 class HomeScreen extends StatefulWidget {
