@@ -8,27 +8,40 @@ from database import get_db
 
 router = APIRouter()
 
-@router.post("/create_service")
-def create_service(service: schemas.ServiceCreate, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
-    db_service = models.Service(**service.model_dump())
+# ✅ Create a New Service (Only Business Owners)
+@router.post("/create_service", response_model=schemas.Service)
+def create_service(
+    service: schemas.ServiceCreate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user)
+):
+    """Creates a service under the logged-in user's business."""
+    business = db.query(models.Business).filter(models.Business.owner_id == user.id).first()
+    if not business:
+        raise HTTPException(status_code=403, detail="Not authorized to create services")
+
+    db_service = models.Service(**service.model_dump(), business_id=business.id)
     db.add(db_service)
     db.commit()
     db.refresh(db_service)
     return db_service
 
-@router.get("/list_services")
+# ✅ List Services (With Filters)
+@router.get("/list_services", response_model=List[schemas.Service])
 def list_services(
     skip: int = 0,
     limit: int = 100,
     business_id: Optional[str] = None,
     search: Optional[str] = None,
-    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user)
 ):
+    """Fetches services with optional business and search filters."""
     query = db.query(models.Service)
-    
+
     if business_id:
         query = query.filter(models.Service.business_id == business_id)
-    
+
     if search:
         search = search.strip()
         query = query.filter(
@@ -37,40 +50,67 @@ def list_services(
                 func.similarity(models.Service.description, search) > 0.3
             )
         ).order_by(func.similarity(models.Service.name, search).desc())
-    
-    services = query.offset(skip).limit(limit).all()
-    return services
 
-@router.get("/get_service/{service_id}")
-def get_service(service_id: str, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
+    return query.offset(skip).limit(limit).all()
+
+# ✅ Get Service by ID
+@router.get("/get_service/{service_id}", response_model=schemas.Service)
+def get_service(
+    service_id: str,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user)
+):
+    """Retrieves a service by its ID."""
     service = db.query(models.Service).filter(models.Service.id == service_id).first()
-    if service is None:
+
+    if not service:
         raise HTTPException(status_code=404, detail="Service not found")
+
     return service
 
-@router.post("/update_service/{service_id}")
+# ✅ Update Service (Only Business Owners)
+@router.put("/update_service/{service_id}", response_model=schemas.Service)
 def update_service(
     service_id: str,
-    service: schemas.ServiceCreate,
-    db: Session = Depends(get_db), user: models.User = Depends(get_current_user)
+    service_update: schemas.ServiceCreate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user)
 ):
+    """Allows business owners to update their services."""
     db_service = db.query(models.Service).filter(models.Service.id == service_id).first()
-    if db_service is None:
+
+    if not db_service:
         raise HTTPException(status_code=404, detail="Service not found")
-    
-    for key, value in service.model_dump().items():
+
+    # Ensure the user owns the business that created the service
+    business = db.query(models.Business).filter(models.Business.id == db_service.business_id, models.Business.owner_id == user.id).first()
+    if not business:
+        raise HTTPException(status_code=403, detail="Not authorized to update this service")
+
+    for key, value in service_update.model_dump().items():
         setattr(db_service, key, value)
-    
+
     db.commit()
     db.refresh(db_service)
     return db_service
 
-@router.post("/delete_service/{service_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_service(service_id: str, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
+# ✅ Delete Service (Only Business Owners)
+@router.delete("/delete_service/{service_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_service(
+    service_id: str,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user)
+):
+    """Allows business owners to delete their services."""
     service = db.query(models.Service).filter(models.Service.id == service_id).first()
-    if service is None:
+
+    if not service:
         raise HTTPException(status_code=404, detail="Service not found")
-    
+
+    # Ensure the user owns the business that created the service
+    business = db.query(models.Business).filter(models.Business.id == service.business_id, models.Business.owner_id == user.id).first()
+    if not business:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this service")
+
     db.delete(service)
     db.commit()
-    return None
