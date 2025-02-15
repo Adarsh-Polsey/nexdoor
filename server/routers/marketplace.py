@@ -113,7 +113,7 @@ def mark_item_as_sold(
     return item
 
 # ✅ Delete Marketplace Item (Only Seller Can Delete)
-@router.delete("/delete_marketplace_item/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete_marketplace_item/{item_id}", status_code=204)
 def delete_marketplace_item(
     item_id: str,
     db: Session = Depends(get_db),

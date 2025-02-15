@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:nexdoor/core/theme/color_pallete.dart';
+import 'package:nexdoor/common/core/theme/color_pallete.dart';
 import 'package:nexdoor/features/business/view/widgets/custom_popup_menu.dart';
 
 class PostScreen extends StatefulWidget {

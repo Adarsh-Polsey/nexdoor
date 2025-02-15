@@ -95,7 +95,7 @@ def update_service(
     return db_service
 
 # ✅ Delete Service (Only Business Owners)
-@router.delete("/delete_service/{service_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete_service/{service_id}", status_code=204)
 def delete_service(
     service_id: str,
     db: Session = Depends(get_db),

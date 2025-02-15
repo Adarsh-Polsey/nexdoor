@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:nexdoor/core/responsive/responsive.dart';
+import 'package:nexdoor/common/core/responsive/responsive.dart';
 import 'package:nexdoor/features/auth/models/user.dart';
 import 'package:nexdoor/features/auth/repositories/auth_repository.dart';
 import 'package:nexdoor/features/settings_profile/repositories/user_repository.dart';

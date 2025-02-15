@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:nexdoor/core/theme/color_pallete.dart';
+import 'package:nexdoor/common/core/theme/color_pallete.dart';
 
 class CustomField extends StatelessWidget {
   const CustomField(

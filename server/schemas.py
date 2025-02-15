@@ -6,12 +6,11 @@ from enum import Enum
 # ✅ User Schemas
 class UserBase(BaseModel):
     email: EmailStr
-    full_name: Optional[str] = None
-    phone_number: Optional[str] = None
-    location: Optional[str] = None
-
 class UserCreate(UserBase):
-    password: str  # Required for user creation
+    uid:str
+    full_name: str
+    phone_number: str
+    location: str
 
 class User(UserBase):
     id: UUID4

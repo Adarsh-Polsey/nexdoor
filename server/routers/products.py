@@ -120,7 +120,7 @@ def update_product_stock(
     return product
 
 # ✅ Delete Product (Only Business Owners)
-@router.delete("/delete_product/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete_product/{product_id}", status_code=204)
 def delete_product(
     product_id: str,
     db: Session = Depends(get_db),

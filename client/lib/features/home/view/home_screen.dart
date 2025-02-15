@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:nexdoor/core/theme/color_pallete.dart';
+import 'package:nexdoor/common/core/theme/color_pallete.dart';
 import 'package:nexdoor/features/business/view/discussion_screen.dart';
 import 'package:nexdoor/features/ai_chat/view/ai_chat_screen.dart';
 import 'package:nexdoor/features/business/view/view_businesses_screen.dart';
-import 'package:nexdoor/features/business/view/marketplace.dart';
+import 'package:nexdoor/features/marketplace/view/marketplace.dart';
 import 'package:nexdoor/features/settings_profile/view/settings_screen.dart';
 import 'package:nexdoor/widgets/c_textfield_widget.dart';
 
@@ -19,12 +19,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> activePage = [
     PostScreen(),
-    SellScreen(),
+    BusinessFeedView(),
     ChatScreen(),
     GroupScreen(),
     SettingsScreen(),
   ];
-  int selectedIndex = 0;
+  int selectedIndex = 4;
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -8,7 +8,7 @@ from database import get_db
 router = APIRouter()
 
 # ✅ Create Booking
-@router.post("/create_booking", response_model=schemas.Booking, status_code=status.HTTP_201_CREATED)
+@router.post("/create_booking", response_model=schemas.Booking, status_code=201)
 def create_booking(
     booking: schemas.BookingCreate, 
     db: Session = Depends(get_db), 
@@ -104,7 +104,7 @@ def update_booking_status(
     return booking
 
 # ✅ Delete Booking
-@router.delete("/delete_booking/{booking_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete_booking/{booking_id}", status_code=204)
 def delete_booking(
     booking_id: str, 
     db: Session = Depends(get_db), 

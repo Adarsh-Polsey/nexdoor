@@ -1,54 +1,91 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
-
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:nexdoor/core/theme/color_pallete.dart';
+import 'package:nexdoor/common/core/theme/color_pallete.dart';
+import 'package:nexdoor/common/services/api_service.dart';
+import 'package:nexdoor/common/utils/shared_prefs/shared_prefs.dart';
 import 'package:nexdoor/features/auth/models/user.dart';
 import 'package:nexdoor/features/settings_profile/repositories/user_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toastification/toastification.dart';
 
 // Contains Firebase Authentication handling functions and token initialisation
 // **Firebase functions --- Signing in -- Signing up -- Firebase Signout -- Firebase id generation -- email verification --  Reset password
 // **Other functions --- Credential clearing and Log out -- Token intialisation
 // **Firebase error handling function
-class AuthService {
-// instance of FirebaseAuth
+
+class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-// Sign in
-  Future<bool> signin(String email, String pass) async {
+  final ApiService apiService = ApiService();
+
+  /// **Sign Up with Firebase & Sync with FastAPI**
+  Future<bool> signUp(
+      {required String email,
+      required String password,
+      required UserModel user}) async {
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: pass);
-      notifier("Login successful", isSuccess: true);
-      return true;
+      // Sign up in Firebase
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      String? uid = userCredential.user?.uid;
+      if (uid == null) throw Exception("Failed to retrieve Firebase UID.");
+      final data = jsonEncode({
+        "uid": uid,
+        "email": email,
+        "full_name": user.name,
+        "phone_number": user.phoneNumber,
+        "location": user.location
+      });
+      final Response<dynamic> response = await apiService.postData(
+        "/auth/signup",
+        data: data,
+      );
+      if (response.statusCode == 201) {
+        log("Returning true signUp(): $response $uid");
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("uid", uid);
+        return true;
+      } else {
+        throw Exception("Failed to register user in FastAPI");
+      }
     } on FirebaseAuthException catch (e) {
       handleFirebaseAuthError(e);
-      return false;
+      throw Exception(e.message);
     }
   }
 
-  get checkLogin{
-    var user = _auth.currentUser;
-    if (user != null) {
+  /// **Login with Firebase & Sync UID with FastAPI**
+  Future<bool> login(String email, String password) async {
+    try {
+      // Login via Firebase
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      String? uid = userCredential.user?.uid;
+      if (uid == null) throw Exception("Failed to retrieve Firebase UID.");
+      await SharedPrefs.saveUserId(uid);
+
       return true;
-    } else {
-      return false;
+    } on FirebaseAuthException catch (e) {
+      handleFirebaseAuthError(e);
+      throw Exception(e.message);
     }
   }
 
-//Sign up
-  Future<bool> signUp(String email, String pass,UserModel user) async {
-    try {
-      await _auth.createUserWithEmailAndPassword(email: email, password: pass);
-      UserDataService us = UserDataService();
-      bool status = await us.addUser(user: user);
-      notifier("Welcome $email", isSuccess: status);
-      return status;
-      // userCredential.user?.sendEmailVerification();
-    } on FirebaseAuthException catch (e) {
-      handleFirebaseAuthError(e);
-      return false;
-    }
+  /// **Logout**
+  Future<void> logout() async {
+    await _auth.signOut();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove("uid");
   }
 
 //Firebase Sign out - done at first itself to avoid unneccessary calls from firebase service inApp
@@ -75,26 +112,25 @@ class AuthService {
           title: const Text(
             'Email verification',
             style: TextStyle(
-                fontSize: 20,
-               ),
+              fontSize: 20,
+            ),
           ),
           content: const Text(
             "An email has been sent to your mail,\nCheck your inbox for verification link",
             style: TextStyle(
-                fontSize: 16,
-                ),
+              fontSize: 16,
+            ),
           ),
           actions: [
             TextButton(
-              style: TextButton.styleFrom(
-                  elevation: 3),
+              style: TextButton.styleFrom(elevation: 3),
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Center(child: Text(
-                    'OK',
-                    style: TextStyle(
-                        ),
+              child: const Center(
+                child: Text(
+                  'OK',
+                  style: TextStyle(),
                 ),
               ),
             )
@@ -126,8 +162,8 @@ class AuthService {
 // Get token
   Future<String?> getId() async {
     try {
-      String? token = await _auth.currentUser?.getIdToken();
-      return token;
+      String? id = _auth.currentUser?.uid;
+      return id;
     } on FirebaseAuthException catch (e) {
       handleFirebaseAuthError(e);
       throw Exception(e.code);
@@ -141,16 +177,6 @@ class AuthService {
       notifier("Check your mail inbox for password updating link");
     } on FirebaseAuthException catch (e) {
       handleFirebaseAuthError(e);
-    }
-  }
-
-// Account deletion
-  Future<bool> deleteAccount(BuildContext context) async {
-    try {
-      return true;
-    } catch (e, s) {
-      errorNotifier("Account deletion unsucceessful", e, s);
-      return false;
     }
   }
 
@@ -195,9 +221,9 @@ notifier(String message,
     {bool isSuccess = false, bool isError = false, bool isWarning = false}) {
   if (isSuccess) {
     toastification.show(
-      primaryColor: ColorPalette.primaryText.withValues(alpha: 0.4),
-      backgroundColor: ColorPalette.primaryColor,
-      foregroundColor: ColorPalette.primaryText,
+        primaryColor: ColorPalette.primaryText.withValues(alpha: 0.4),
+        backgroundColor: ColorPalette.primaryColor,
+        foregroundColor: ColorPalette.primaryText,
         title: const Text("Success!"),
         description: Text(message),
         alignment: Alignment.topCenter,
@@ -206,9 +232,9 @@ notifier(String message,
         type: ToastificationType.success);
   } else if (isError) {
     toastification.show(
-      primaryColor: ColorPalette.error.withValues(alpha: 0.4),
-      backgroundColor: ColorPalette.primaryColor,
-      foregroundColor: ColorPalette.error,
+        primaryColor: ColorPalette.error.withValues(alpha: 0.4),
+        backgroundColor: ColorPalette.primaryColor,
+        foregroundColor: ColorPalette.error,
         title: const Text("Error!"),
         description: Text(message),
         alignment: Alignment.topCenter,
@@ -217,9 +243,9 @@ notifier(String message,
         type: ToastificationType.error);
   } else if (isWarning) {
     toastification.show(
-      primaryColor: ColorPalette.secondaryText.withValues(alpha: 0.4),
-      backgroundColor: ColorPalette.primaryColor,
-      foregroundColor: ColorPalette.secondaryText,
+        primaryColor: ColorPalette.secondaryText.withValues(alpha: 0.4),
+        backgroundColor: ColorPalette.primaryColor,
+        foregroundColor: ColorPalette.secondaryText,
         title: const Text("Warning!"),
         description: Text(message),
         alignment: Alignment.topCenter,
@@ -228,9 +254,9 @@ notifier(String message,
         type: ToastificationType.warning);
   } else {
     toastification.show(
-      primaryColor: ColorPalette.primaryText.withValues(alpha: 0.4),
-      backgroundColor: ColorPalette.primaryColor,
-      foregroundColor: ColorPalette.primaryText,
+        primaryColor: ColorPalette.primaryText.withValues(alpha: 0.4),
+        backgroundColor: ColorPalette.primaryColor,
+        foregroundColor: ColorPalette.primaryText,
         title: const Text("!!"),
         description: Text(message),
         alignment: Alignment.topCenter,

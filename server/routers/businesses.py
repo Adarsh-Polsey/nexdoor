@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
 from typing import List, Optional
@@ -86,7 +86,7 @@ def update_business(
     return db_business
 
 # ✅ Delete Business (Only Owner Can Delete)
-@router.delete("/delete_business/{business_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete_business/{business_id}", status_code=204)
 def delete_business(
     business_id: str,
     db: Session = Depends(get_db),

@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:nexdoor/core/responsive/responsive.dart';
+import 'package:nexdoor/common/core/responsive/responsive.dart';
 import 'package:nexdoor/features/auth/repositories/auth_repository.dart';
 import 'package:nexdoor/widgets/c_button_widget.dart';
 import 'package:nexdoor/widgets/c_textfield_widget.dart';
@@ -65,7 +65,7 @@ TextEditingController emailController = TextEditingController();
 
   bool loggingIn = false;
 
-  AuthService authService = AuthService();
+  AuthRepository authService = AuthRepository();
 @override
   void dispose() {
     super.dispose();
@@ -127,7 +127,7 @@ TextEditingController emailController = TextEditingController();
                     try {
                       loggingIn = true;
                       setState(() {});
-                      if (await authService.signin(
+                      if (await authService.login(
                           emailController.text, passwordController.text)) {
                         Navigator.popAndPushNamed(context, "/home");
                       }

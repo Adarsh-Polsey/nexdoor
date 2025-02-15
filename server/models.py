@@ -12,13 +12,14 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    uid=Column(String, unique=True, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
     full_name = Column(String, nullable=True)
     phone_number = Column(String, nullable=True)
     location = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     is_active = Column(Boolean, default=True)
+    is_business = Column(Boolean, default=False)
 
     # Relationships
     businesses = relationship("Business", back_populates="owner", lazy="joined", cascade="all, delete-orphan")
@@ -37,6 +38,8 @@ class Business(Base):
     name = Column(String, index=True, nullable=False)
     description = Column(Text, nullable=True)
     category = Column(String, nullable=False)
+    business_type=Column(String, nullable=False)
+    location = Column(String, nullable=False)
     address = Column(String, nullable=False)
     phone = Column(String, nullable=True)
     email = Column(String, nullable=True)

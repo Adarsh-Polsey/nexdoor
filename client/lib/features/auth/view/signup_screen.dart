@@ -3,7 +3,7 @@ import 'package:nexdoor/features/auth/models/user.dart';
 import 'package:nexdoor/features/auth/repositories/auth_repository.dart';
 import 'package:nexdoor/widgets/c_button_widget.dart';
 import 'package:nexdoor/widgets/c_textfield_widget.dart';
-import 'package:nexdoor/core/responsive/responsive.dart';
+import 'package:nexdoor/common/core/responsive/responsive.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
@@ -164,9 +164,8 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                   "phoneNumber": phoneNumberController.text,
                   "location": locationController.text
                 });
-                AuthService authService = AuthService();
-                if (await authService.signUp(
-                    emailController.text, passwordController.text,currentUser)) {
+                AuthRepository authService = AuthRepository();
+                if (await authService.signUp(email:emailController.text, password:passwordController.text,user:currentUser)) {
                   Navigator.popAndPushNamed(context, "/home");
                 }
                 isSigningUp = false;
