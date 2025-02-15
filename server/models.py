@@ -62,7 +62,7 @@ class Service(Base):
     business_id = Column(UUID(as_uuid=True), ForeignKey("businesses.id", ondelete="CASCADE"))
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
-    duration = Column(Integer, nullable=False)  # In minutes
+    duration = Column(Integer, nullable=False)
     price = Column(Float, nullable=False)
     is_active = Column(Boolean, default=True)
 

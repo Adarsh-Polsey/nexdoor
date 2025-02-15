@@ -33,7 +33,7 @@ class SettingsScreen extends StatelessWidget {
                     icon: Icons.business_outlined,
                     label: 'Create Business Account',
                     onTap: () {
-                      // Navigate to Create Business Account Screen
+                      Navigator.pushNamed(context, '/create_business');
                       print('Create Business Account Tapped');
                     },
                   ),

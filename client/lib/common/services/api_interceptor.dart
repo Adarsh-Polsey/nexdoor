@@ -9,6 +9,8 @@ class ApiInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     String? userId = await SharedPrefs.getUserId();
+    final data = options.queryParameters;
+    log("data: $data");
     log("onRequest: $userId");
     if (userId != null) {
       options.headers["user-id"] = userId;
@@ -33,6 +35,5 @@ class ApiInterceptor extends Interceptor {
     else{
       throw Exception("Unauthorized");
     }
-    return handler.next(err);
   }
 }

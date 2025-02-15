@@ -116,7 +116,7 @@ TextEditingController emailController = TextEditingController();
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, "/resetPassword");
+                        Navigator.pushNamed(context, "/reset_password");
                       },
                       child: const Text("Forgot Password? ")),
                 ),

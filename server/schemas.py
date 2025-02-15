@@ -25,6 +25,9 @@ class BusinessBase(BaseModel):
     name: str
     description: Optional[str] = None
     category: str
+    business_type: str
+    location: str
+    address: str
     address: str
     phone: Optional[str] = None
     email: Optional[EmailStr] = None
