@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:nexdoor/features/auth/repositories/auth_repository.dart';
 import 'package:nexdoor/features/settings_profile/models/business_model.dart';
 import 'package:nexdoor/features/settings_profile/viewmodel/business_viewmodel.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +19,7 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _websiteController = TextEditingController();
-  
+
   String? _selectedBusinessType;
   String? _selectedCategory;
   String? _selectedLocation;
@@ -26,14 +27,9 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
 
   // Predefined lists for dropdowns
   final List<String> _businessTypes = [
-    'Retail',
-    'Service',
-    'Restaurant',
-    'Professional',
-    'Entertainment',
-    'Healthcare',
-    'Education',
-    'Other'
+    'Physical',
+    'Online',
+    'Hybrid'
   ];
 
   final List<String> _categories = [
@@ -50,21 +46,18 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
   ];
 
   final List<String> _locations = [
-    'North Region',
-    'South Region',
-    'East Region',
-    'West Region',
-    'Central Region',
-    'Downtown',
-    'Suburban Area',
-    'Industrial Area',
-    'Business District'
+    'Kozhikode Town',
+    'Devagiri',
+    'Kovoor',
+    'Chevayoor',
+    'Thondayad',
+    'Pottamal',
+    'Arayidathupalam'
   ];
 
   @override
   Widget build(BuildContext context) {
     final businessViewModel = Provider.of<BusinessViewModel>(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Business'),
@@ -72,7 +65,7 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal:60.0),
+          padding: const EdgeInsets.symmetric(horizontal: 60.0),
           child: Form(
             key: _formKey,
             child: Column(
@@ -84,26 +77,28 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
                     _buildInputField(
                       controller: _nameController,
                       label: 'Business Name',
-                      validator: (value) =>
-                          value?.isEmpty ?? true ? 'Business name is required' : null,
+                      validator: (value) => value?.isEmpty ?? true
+                          ? 'Business name is required'
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     _buildDropdown(
                       label: 'Business Type',
                       value: _selectedBusinessType,
                       items: _businessTypes,
-                      onChanged: (value) => setState(() => _selectedBusinessType = value),
+                      onChanged: (value) =>
+                          setState(() => _selectedBusinessType = value),
                     ),
                     const SizedBox(height: 16),
                     _buildDropdown(
                       label: 'Category',
                       value: _selectedCategory,
                       items: _categories,
-                      onChanged: (value) => setState(() => _selectedCategory = value),
+                      onChanged: (value) =>
+                          setState(() => _selectedCategory = value),
                     ),
                   ],
                 ),
-                
                 _buildSection(
                   'Location & Contact',
                   [
@@ -111,7 +106,8 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
                       label: 'Location',
                       value: _selectedLocation,
                       items: _locations,
-                      onChanged: (value) => setState(() => _selectedLocation = value),
+                      onChanged: (value) =>
+                          setState(() => _selectedLocation = value),
                     ),
                     const SizedBox(height: 16),
                     _buildInputField(
@@ -123,8 +119,12 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
                         LengthLimitingTextInputFormatter(10),
                       ],
                       validator: (value) {
-                        if (value?.isEmpty ?? true) return 'Phone number is required';
-                        if (value!.length < 10) return 'Enter a valid phone number';
+                        if (value?.isEmpty ?? true) {
+                          return 'Phone number is required';
+                        }
+                        if (value!.length < 10) {
+                          return 'Enter a valid phone number';
+                        }
                         return null;
                       },
                     ),
@@ -135,14 +135,16 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value?.isEmpty ?? true) return 'Email is required';
-                        final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                        if (!emailRegex.hasMatch(value!)) return 'Enter a valid email';
+                        final emailRegex =
+                            RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                        if (!emailRegex.hasMatch(value!)) {
+                          return 'Enter a valid email';
+                        }
                         return null;
                       },
                     ),
                   ],
                 ),
-
                 _buildSection(
                   'Additional Details',
                   [
@@ -160,23 +162,25 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
                       validator: (value) {
                         if (value?.isEmpty ?? true) return null;
                         final urlRegex = RegExp(
-                          r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$'
-                        );
-                        if (!urlRegex.hasMatch(value!)) return 'Enter a valid website URL';
+                            r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$');
+                        if (!urlRegex.hasMatch(value!)) {
+                          return 'Enter a valid website URL';
+                        }
                         return null;
                       },
                     ),
                     const SizedBox(height: 16),
                     SwitchListTile(
                       title: const Text('Delivery Available'),
-                      subtitle: const Text('Toggle if you offer delivery services'),
+                      subtitle:
+                          const Text('Toggle if you offer delivery services'),
                       value: _allowsDelivery,
                       contentPadding: EdgeInsets.zero,
-                      onChanged: (value) => setState(() => _allowsDelivery = value),
+                      onChanged: (value) =>
+                          setState(() => _allowsDelivery = value),
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () async {
@@ -201,11 +205,7 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
 
                       await businessViewModel.createBusiness(business);
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Business created successfully'),
-                          ),
-                        );
+                        notifier('Business created successfully');
                         Navigator.pop(context);
                       }
                     } else {
@@ -263,7 +263,8 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
         labelText: label,
         helperText: helperText,
         border: const OutlineInputBorder(),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
@@ -283,7 +284,8 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
       items: items.map((String item) {
         return DropdownMenuItem<String>(

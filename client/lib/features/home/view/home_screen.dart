@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:nexdoor/common/core/theme/color_pallete.dart';
-import 'package:nexdoor/features/business/view/discussion_screen.dart';
+import 'package:nexdoor/features/blog/view/discussion_screen.dart';
 import 'package:nexdoor/features/ai_chat/view/ai_chat_screen.dart';
 import 'package:nexdoor/features/business/view/view_businesses_screen.dart';
 import 'package:nexdoor/features/marketplace/view/marketplace.dart';

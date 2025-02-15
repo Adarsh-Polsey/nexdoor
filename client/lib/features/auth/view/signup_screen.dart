@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:nexdoor/features/auth/models/user.dart';
+import 'package:nexdoor/features/settings_profile/models/user_model.dart';
 import 'package:nexdoor/features/auth/repositories/auth_repository.dart';
 import 'package:nexdoor/widgets/c_button_widget.dart';
 import 'package:nexdoor/widgets/c_textfield_widget.dart';

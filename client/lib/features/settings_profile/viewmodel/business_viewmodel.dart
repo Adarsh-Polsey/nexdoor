@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -40,9 +39,6 @@ class BusinessViewModel with ChangeNotifier {
 
     try {
       final Response response = await _apiService.postData('/businesses/create_business', data: business.toJson());
-      // _businesses.add(Business.fromJson(response.data));
-      log("Response data: "+response.data);
-      log("Status code: "+response.statusCode.toString());
       return response.data;
     } catch (e) {
       print('Error creating business: $e');

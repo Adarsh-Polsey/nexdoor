@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:nexdoor/common/core/theme/color_pallete.dart';
 import 'package:nexdoor/common/services/api_service.dart';
 import 'package:nexdoor/common/utils/shared_prefs/shared_prefs.dart';
-import 'package:nexdoor/features/auth/models/user.dart';
-import 'package:nexdoor/features/settings_profile/repositories/user_repository.dart';
+import 'package:nexdoor/features/settings_profile/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toastification/toastification.dart';
 
@@ -39,7 +38,7 @@ class AuthRepository {
       final data = jsonEncode({
         "uid": uid,
         "email": email,
-        "full_name": user.name,
+        "full_name": user.full_name,
         "phone_number": user.phoneNumber,
         "location": user.location
       });
@@ -102,8 +101,7 @@ class AuthRepository {
           if (!_auth.currentUser!.emailVerified) {
             _auth.currentUser?.sendEmailVerification();
           } else {
-            UserDataService us = UserDataService();
-            us.updateUser({'isVerified': _auth.currentUser?.emailVerified});
+            Navigator.pop(context);
           }
         } on FirebaseAuthException catch (e) {
           handleFirebaseAuthError(e);
@@ -147,8 +145,6 @@ class AuthRepository {
   bool get checkVerification {
     try {
       if (_auth.currentUser!.emailVerified) {
-        UserDataService us = UserDataService();
-        us.updateUser({'isVerified': true});
         return true;
       } else {
         return false;
