@@ -55,14 +55,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           icon: Icons.manage_accounts_outlined,
                           label: 'Manage Business',
                           onTap: () {
-                            Navigator.pushNamed(context, '/create_business');
+                            Navigator.pushNamed(context, '/manage_business');
                           },
                         ),
                         _buildSettingsBox(
                           icon: Icons.add_business_outlined,
                           label: 'Add Services',
                           onTap: () {
-                            print('Edit Profile Tapped');
+                            print('Add services Tapped');
                           },
                         ),
                       ],

@@ -251,7 +251,7 @@ class _ManageBusinessScreenState extends State<ManageBusinessScreen> {
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
-                            child: const Text('Save Business'),
+                            child: const Text('Update Business'),
                           ),
                         ],
                       ),

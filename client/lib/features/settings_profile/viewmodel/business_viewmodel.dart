@@ -16,7 +16,8 @@ class BusinessViewModel with ChangeNotifier {
   String? get errorMessage => _errorMessage;
 
   // Fetch a list of businesses
-  Future<void> fetchBusinesses({int skip = 0, int limit = 10, String search = ''}) async {
+  Future<void> fetchBusinesses(
+      {int skip = 0, int limit = 10, String search = ''}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -31,7 +32,9 @@ class BusinessViewModel with ChangeNotifier {
         },
       );
 
-      _businesses = (response['data'] as List).map((business) => Business.fromJson(business)).toList();
+      _businesses = (response['data'] as List)
+          .map((business) => Business.fromJson(business))
+          .toList();
     } catch (e) {
       _errorMessage = 'Failed to fetch businesses: $e';
       print(_errorMessage);
@@ -48,20 +51,20 @@ class BusinessViewModel with ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _apiService.getData(
-        'businesses/get_business',
+      final Response response = await _apiService.getData(
+        '/businesses/get_business',
         queryParameters: businessId != null ? {'business_id': businessId} : {},
       );
 
-      if (response != null && response['data'] != null) {
-        _business = Business.fromJson(response['data']);
+      if (response.statusCode == 200) {
+        _business = Business.fromJson(response.data);
         return _business;
       } else {
         throw Exception('No business data found');
       }
-    } catch (e) {
+    } catch (e,s) {
       _errorMessage = 'Failed to fetch business: $e';
-      print(_errorMessage);
+      print("$_errorMessage : $s");
       return null;
     } finally {
       _isLoading = false;

@@ -9,6 +9,7 @@ import 'package:nexdoor/features/blog/view/discussion_screen.dart';
 import 'package:nexdoor/features/business/view/view_businesses_screen.dart';
 import 'package:nexdoor/features/home/view/home_screen.dart';
 import 'package:nexdoor/features/settings_profile/view/create_business_screen.dart';
+import 'package:nexdoor/features/settings_profile/view/manage_business_screen.dart';
 import 'package:nexdoor/features/settings_profile/view/settings_screen.dart';
 import 'package:nexdoor/features/settings_profile/viewmodel/business_viewmodel.dart';
 import 'package:nexdoor/features/settings_profile/viewmodel/user_viewmodel.dart';
@@ -52,6 +53,7 @@ class MyApp extends StatelessWidget {
         '/view_businesses': (context) => PostScreen(),
         // More - Settings screens
         '/create_business': (context) => CreateBusinessScreen(),
+        '/manage_business': (context) => ManageBusinessScreen(),
       },
       initialRoute: '/',
     );

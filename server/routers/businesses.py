@@ -51,19 +51,17 @@ def list_businesses(
 
 # ✅ Get Business by ID
 @router.get("/get_business/{business_id}", response_model=schemas.Business)
-@router.get("/get_business/", response_model=schemas.Business)  # Optional business_id
+@router.get("/get_business/", response_model=schemas.Business)
 def get_business(
-    business_id: str = None,  # Make business_id optional
+    business_id: str = None,  
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user)
 ):
     if business_id:
-        # Fetch the business by ID
         business = db.query(models.Business).filter(models.Business.id == business_id).first()
         if not business:
             raise HTTPException(status_code=404, detail="Business not found")
     else:
-        # Fetch the user's own business
         business = db.query(models.Business).filter(models.Business.owner_id == user.uid).first()
         if not business:
             raise HTTPException(status_code=404, detail="No business found for the current user")
@@ -71,7 +69,7 @@ def get_business(
     return business
 
 # ✅ Update Business (Only Owner Can Update)
-@router.put("/update_business/", response_model=schemas.Business)
+@router.post("/update_business/", response_model=schemas.Business)
 def update_business(
     business_update: schemas.BusinessCreate,
     db: Session = Depends(get_db),
@@ -82,7 +80,7 @@ def update_business(
     if not db_business:
         raise HTTPException(status_code=404, detail="Business not found")
 
-    if db_business.owner_id != user.id:
+    if db_business.owner_id != user.uid:
         raise HTTPException(status_code=403, detail="Not authorized to update this business")
 
     for key, value in business_update.model_dump().items():
