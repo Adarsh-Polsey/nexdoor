@@ -38,10 +38,11 @@ class AuthRepository {
       final data = jsonEncode({
         "uid": uid,
         "email": email,
-        "full_name": user.full_name,
+        "full_name": user.fullName,
         "phone_number": user.phoneNumber,
         "location": user.location
       });
+      log("Data: "+data.toString());
       final Response<dynamic> response = await apiService.postData(
         "/auth/signup",
         data: data,

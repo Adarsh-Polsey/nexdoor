@@ -39,7 +39,7 @@ class BusinessCreate(BusinessBase):
 
 class Business(BusinessBase):
     id: UUID4
-    owner_id: UUID4
+    owner_id: str
     is_active: bool
     created_at: datetime
     updated_at: Optional[datetime] = None

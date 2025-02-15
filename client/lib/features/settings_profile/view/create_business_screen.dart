@@ -26,11 +26,7 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
   bool _allowsDelivery = false;
 
   // Predefined lists for dropdowns
-  final List<String> _businessTypes = [
-    'Physical',
-    'Online',
-    'Hybrid'
-  ];
+  final List<String> _businessTypes = ['Physical', 'Online', 'Hybrid'];
 
   final List<String> _categories = [
     'Food & Beverage',
@@ -65,12 +61,13 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 60.0),
+          padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 10),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Basic Information
                 _buildSection(
                   'Basic Information',
                   [
@@ -99,6 +96,7 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
                     ),
                   ],
                 ),
+                //  Location & Contact
                 _buildSection(
                   'Location & Contact',
                   [
@@ -145,6 +143,7 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
                     ),
                   ],
                 ),
+                //  Additional Details
                 _buildSection(
                   'Additional Details',
                   [
@@ -192,8 +191,8 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
                         id: '',
                         name: _nameController.text,
                         description: _descriptionController.text,
-                        category: _selectedCategory!,
-                        address: _selectedLocation!,
+                        category: _selectedCategory ?? "",
+                        address: _selectedLocation ?? "",
                         phone: _phoneController.text,
                         email: _emailController.text,
                         website: _websiteController.text,
@@ -201,12 +200,20 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
                         ownerId: '',
                         isActive: true,
                         createdAt: DateTime.now(),
+                        businessType: _selectedBusinessType ?? "",
+                        location: _selectedLocation ?? "",
                       );
-
-                      await businessViewModel.createBusiness(business);
-                      if (mounted) {
-                        notifier('Business created successfully');
-                        Navigator.pop(context);
+                      try {
+                        final response =
+                            await businessViewModel.createBusiness(business);
+                        if (response == true) {
+                          notifier('Business updated successfully');
+                          Navigator.pop(context);
+                        } else {
+                          notifier('Failed to update business');
+                        }
+                      } catch (e) {
+                        print(e);
                       }
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -258,6 +265,7 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
     int? maxLines,
   }) {
     return TextFormField(
+      maxLengthEnforcement: MaxLengthEnforcement.enforced,
       controller: controller,
       decoration: InputDecoration(
         labelText: label,

@@ -25,8 +25,6 @@ def get_current_user(user_id: str = Header(None), db: Session = Depends(get_db))
 # ✅ Signup Route (Creates a New User)
 @router.post("/signup", status_code=201)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    """Registers a new user, ensuring unique email and creating a new user instance."""
-    
     # Check if the email is already in use
     if db.query(models.User).filter(models.User.email == user.email).first():
         raise HTTPException(

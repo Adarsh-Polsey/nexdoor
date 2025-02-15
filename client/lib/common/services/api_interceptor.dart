@@ -6,8 +6,7 @@ import 'package:nexdoor/features/auth/repositories/auth_repository.dart';
 
 class ApiInterceptor extends Interceptor {
   @override
-  void onRequest(
-      RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
       String? userId = await SharedPrefs.getUserId();
       log("onRequest: userId = $userId");

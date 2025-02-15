@@ -24,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     GroupScreen(),
     SettingsScreen(),
   ];
-  int selectedIndex = 4;
+  int selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(

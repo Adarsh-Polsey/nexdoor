@@ -158,12 +158,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                 }
                 isSigningUp = true;
                 setState(() {});
-                UserModel currentUser=UserModel.fromMap({
-                  "email": emailController.text,
-                  "name": nameController.text,
-                  "phoneNumber": phoneNumberController.text,
-                  "location": locationController.text
-                });
+                UserModel currentUser=UserModel(fullName: nameController.text,phoneNumber: phoneNumberController.text,location: locationController.text); 
                 AuthRepository authService = AuthRepository();
                 if (await authService.signUp(email:emailController.text, password:passwordController.text,user:currentUser)) {
                   Navigator.popAndPushNamed(context, "/home");

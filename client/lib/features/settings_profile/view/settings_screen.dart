@@ -9,7 +9,7 @@ class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  _SettingsScreenState createState() => _SettingsScreenState();
+  State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
@@ -32,7 +32,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             }
 
             final user = userViewModel.user;
-            final userName = user?.full_name ?? "John Doe";
+            final userName = user?.fullName ?? "John Doe";
             final userEmail = user?.email ?? "johndoe@example.com";
             final phoneNo = user?.phoneNumber ?? "12398712873";
             final address =

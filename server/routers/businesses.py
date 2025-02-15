@@ -9,14 +9,13 @@ from database import get_db
 router = APIRouter()
 
 # ✅ Create Business
-@router.post("/create_business", response_model=schemas.Business)
+@router.post("/create_business", response_model=schemas.Business,status_code=201)
 def create_business(
     business: schemas.BusinessCreate,
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user)
 ):
-    """Creates a business and assigns it to the logged-in user."""
-    db_business = models.Business(**business.model_dump(), owner_id=user.id)
+    db_business = models.Business(**business.model_dump(), owner_id=user.uid)
     user=db.query(models.User).filter(models.User.uid == user.uid).first()
     if user.is_business:
         raise HTTPException(status_code=403, detail="User already has a business")
@@ -52,29 +51,33 @@ def list_businesses(
 
 # ✅ Get Business by ID
 @router.get("/get_business/{business_id}", response_model=schemas.Business)
+@router.get("/get_business/", response_model=schemas.Business)  # Optional business_id
 def get_business(
-    business_id: str,
+    business_id: str = None,  # Make business_id optional
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user)
 ):
-    """Retrieves a business by ID."""
-    business = db.query(models.Business).filter(models.Business.id == business_id).first()
-
-    if not business:
-        raise HTTPException(status_code=404, detail="Business not found")
+    if business_id:
+        # Fetch the business by ID
+        business = db.query(models.Business).filter(models.Business.id == business_id).first()
+        if not business:
+            raise HTTPException(status_code=404, detail="Business not found")
+    else:
+        # Fetch the user's own business
+        business = db.query(models.Business).filter(models.Business.owner_id == user.uid).first()
+        if not business:
+            raise HTTPException(status_code=404, detail="No business found for the current user")
 
     return business
 
 # ✅ Update Business (Only Owner Can Update)
-@router.put("/update_business/{business_id}", response_model=schemas.Business)
+@router.put("/update_business/", response_model=schemas.Business)
 def update_business(
-    business_id: str,
     business_update: schemas.BusinessCreate,
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user)
 ):
-    """Allows the business owner to update their business details."""
-    db_business = db.query(models.Business).filter(models.Business.id == business_id).first()
+    db_business = db.query(models.Business).filter(models.Business.owner_id == user.uid).first()
 
     if not db_business:
         raise HTTPException(status_code=404, detail="Business not found")
@@ -82,7 +85,7 @@ def update_business(
     if db_business.owner_id != user.id:
         raise HTTPException(status_code=403, detail="Not authorized to update this business")
 
-    for key, value in business_update.dict().items():
+    for key, value in business_update.model_dump().items():
         setattr(db_business, key, value)
 
     db.commit()

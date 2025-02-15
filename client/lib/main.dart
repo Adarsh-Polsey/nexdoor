@@ -12,6 +12,7 @@ import 'package:nexdoor/features/settings_profile/view/create_business_screen.da
 import 'package:nexdoor/features/settings_profile/view/settings_screen.dart';
 import 'package:nexdoor/features/settings_profile/viewmodel/business_viewmodel.dart';
 import 'package:nexdoor/features/settings_profile/viewmodel/user_viewmodel.dart';
+import 'package:nexdoor/features/splash/view/splash_screen.dart';
 import 'package:nexdoor/firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
@@ -37,8 +38,10 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightColorTheme,
       debugShowCheckedModeBanner: false,
       routes: {
+        // Splash Screen
+        "/": (context) => const SplashScreen(),
         // Auth Screens
-        '/': (context) => LoginScreen(),
+        '/login': (context) => LoginScreen(),
         '/signup': (context) => SignUpScreen(),
         '/reset_password': (context) => ResetPasswordScreen(),
         // Bottom Navigation Screens

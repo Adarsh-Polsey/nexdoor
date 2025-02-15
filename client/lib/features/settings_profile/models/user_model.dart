@@ -1,7 +1,7 @@
 class UserModel {
   final String? uid;
   final String? imageUrl;
-  final String? full_name;
+  final String? fullName;
   final String? email;
   final String? phoneNumber;
   final String? location;
@@ -16,7 +16,7 @@ class UserModel {
   UserModel({
     this.uid = "",
     this.imageUrl = "",
-    this.full_name = "",
+    this.fullName = "",
     this.email = "",
     this.phoneNumber = "",
     this.location = "",
@@ -34,7 +34,7 @@ class UserModel {
     return {
       'uid': uid,
       'imageUrl': imageUrl,
-      'full_name': full_name,
+      'full_name': fullName,
       'email': email,
       'phoneNumber': phoneNumber,
       'location': location,
@@ -53,7 +53,7 @@ class UserModel {
     return UserModel(
       uid: map['uid'],
       imageUrl: map['imageUrl'],
-      full_name: map['full_name'],
+      fullName: map['full_name'],
       email: map['email'],
       phoneNumber: map['phone_number'],
       location: map['location'],
@@ -72,7 +72,7 @@ class UserModel {
     return {
       'uid': uid,
       'imageUrl': imageUrl,
-      'full_name': full_name,
+      'full_name': fullName,
       'email': email,
       'phoneNumber': phoneNumber,
       'location': location,
@@ -90,7 +90,7 @@ class UserModel {
     return UserModel(
       uid: json['uid'],
       imageUrl: json['imageUrl'],
-      full_name: json['full_name'],
+      fullName: json['full_name'],
       email: json['email'],
       phoneNumber: json['phone_number'],
       location: json['location'],

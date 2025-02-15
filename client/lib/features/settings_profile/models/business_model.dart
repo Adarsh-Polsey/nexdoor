@@ -2,6 +2,8 @@ class Business {
   final String id;
   final String name;
   final String description;
+  final String businessType;
+  final String location;
   final String category;
   final String address;
   final String phone;
@@ -13,10 +15,11 @@ class Business {
   final DateTime createdAt;
   final DateTime? updatedAt;
 
-  Business({
+  Business( {
     required this.id,
     required this.name,
     required this.description,
+    required this.location, required this.businessType, 
     required this.category,
     required this.address,
     required this.phone,
@@ -44,7 +47,7 @@ class Business {
       ownerId: json['owner_id'],
       isActive: json['is_active'],
       createdAt: DateTime.parse(json['created_at']),
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null, businessType: json['business_type'], location: json['location'],
     );
   }
 
@@ -54,8 +57,10 @@ class Business {
       "id": id,
       "name": name,
       "description": description,
+      "business_type": businessType,
       "category": category,
       "address": address,
+      "location": location,
       "phone": phone,
       "email": email,
       "website": website,

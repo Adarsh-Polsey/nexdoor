@@ -34,7 +34,7 @@ class Business(Base):
     __tablename__ = "businesses"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
+    owner_id = Column(String, ForeignKey("users.uid", ondelete="CASCADE"))
     name = Column(String, index=True, nullable=False)
     description = Column(Text, nullable=True)
     category = Column(String, nullable=False)
