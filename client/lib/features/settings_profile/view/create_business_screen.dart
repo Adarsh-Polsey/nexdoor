@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nexdoor/features/auth/repositories/auth_repository.dart';
-import 'package:nexdoor/features/settings_profile/models/business_model.dart';
-import 'package:nexdoor/features/settings_profile/viewmodel/business_viewmodel.dart';
+import 'package:nexdoor/features/business/models/business_model.dart';
+import 'package:nexdoor/features/settings_profile/viewmodel/profile_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 class CreateBusinessScreen extends StatefulWidget {
@@ -53,7 +53,7 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final businessViewModel = Provider.of<BusinessViewModel>(context);
+    final businessViewModel = Provider.of<ProfileViewModel>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Business'),
@@ -187,7 +187,7 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
                         _selectedBusinessType != null &&
                         _selectedCategory != null &&
                         _selectedLocation != null) {
-                      final business = Business(
+                      final business = BusinessModel(
                         id: '',
                         name: _nameController.text,
                         description: _descriptionController.text,
@@ -208,7 +208,7 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
                             await businessViewModel.createBusiness(business);
                         if (response == true) {
                           notifier('Business updated successfully');
-                          Navigator.pop(context);
+                          Navigator.pushNamedAndRemoveUntil(context, "/home", (route) => false);
                         } else {
                           notifier('Failed to update business');
                         }

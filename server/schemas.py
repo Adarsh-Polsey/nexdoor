@@ -54,6 +54,8 @@ class ServiceBase(BaseModel):
     duration: int  # In minutes
     price: float
     is_active: bool = True
+    available_days: List[str] = []  # List of days (e.g., ["Monday", "Tuesday"])
+    available_hours: List[str] = []  # List of hours (e.g., ["09:00-12:00", "14:00-18:00"])
 
 class ServiceCreate(ServiceBase):
     business_id: UUID4
@@ -61,6 +63,8 @@ class ServiceCreate(ServiceBase):
 class Service(ServiceBase):
     id: UUID4
     business_id: UUID4
+    created_at: datetime  # Timestamp when the service was created
+    updated_at: datetime  # Timestamp when the service was last updated
 
     class Config:
         from_attributes = True

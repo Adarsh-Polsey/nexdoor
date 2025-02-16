@@ -13,11 +13,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # ✅ Dependency to Get Current User from Headers
 @router.post("/get_current_user", status_code=200)
 def get_current_user(user_id: str = Header(None), db: Session = Depends(get_db)):
-    """Fetch the current user based on `user_id` in request headers."""
     if not user_id:
         raise HTTPException(status_code=401, detail="Missing user ID in headers")
-
     user = db.query(models.User).filter(models.User.uid == user_id).first()
+    
     if not user:
         raise HTTPException(status_code=401, detail="Invalid user ID")
     return user

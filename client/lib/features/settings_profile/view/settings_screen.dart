@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:nexdoor/common/core/theme/color_pallete.dart';
-import 'package:nexdoor/features/settings_profile/viewmodel/user_viewmodel.dart';
+import 'package:nexdoor/features/settings_profile/viewmodel/profile_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -17,7 +17,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     Future.microtask(() =>
-        Provider.of<UserViewModel>(context, listen: false).fetchUserData());
+        Provider.of<ProfileViewModel>(context, listen: false).fetchUserData());
   }
 
   @override
@@ -25,7 +25,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 200.0),
-        child: Consumer<UserViewModel>(
+        child: Consumer<ProfileViewModel>(
           builder: (context, userViewModel, child) {
             if (userViewModel.isLoading) {
               return const Center(child: CircularProgressIndicator());
@@ -37,8 +37,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             final phoneNo = user?.phoneNumber ?? "12398712873";
             final address =
                 user?.location ?? "efuhweuifhuwhef  rgferg  rg er g ergreg";
-            final isBusiness = user?.isBusiness ?? false;
-            log(isBusiness.toString());
+            final maxedBusiness = user?.maxedBusiness ?? false;
+            final maxedServices = user?.maxedServices ?? false;
+            log(maxedBusiness.toString());
+            log(maxedServices.toString());
             return Column(
               children: [
                 const SizedBox(height: 10),
@@ -50,7 +52,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
                     children: [
-                      if ((isBusiness)) ...[
+                      if ((maxedBusiness)) ...[
                         _buildSettingsBox(
                           icon: Icons.manage_accounts_outlined,
                           label: 'Manage Business',
@@ -58,13 +60,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             Navigator.pushNamed(context, '/manage_business');
                           },
                         ),
-                        _buildSettingsBox(
+                        if(maxedServices)...[
+                          _buildSettingsBox(
                           icon: Icons.add_business_outlined,
-                          label: 'Add Services',
+                          label: 'Manage Service',
                           onTap: () {
-                            print('Add services Tapped');
+                            // Navigator.pushNamed(context, '/create_services');
                           },
                         ),
+                        ],
+                        if(!maxedServices)...[
+                          _buildSettingsBox(
+                          icon: Icons.add_business_outlined,
+                          label: 'Add Service',
+                          onTap: () {
+                            Navigator.pushNamed(context, '/create_services');
+                          },
+                        ),
+                        ]    
                       ],
                       _buildSettingsBox(
                         icon: Icons.edit_outlined,
@@ -108,7 +121,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             print('Delete Account Tapped');
                           },
                         ),
-                      if (!isBusiness) ...[
+                      if (!maxedBusiness) ...[
                         _buildSettingsBox(
                           icon: Icons.home_outlined,
                           label: 'Home',
@@ -118,7 +131,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         _buildSettingsBox(
                         icon: Icons.business_outlined,
-                        label: 'Create Business Account',
+                        label: 'Create Business',
                         onTap: () {
                           Navigator.pushNamed(context, '/create_business');
                         },

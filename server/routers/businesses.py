@@ -16,10 +16,9 @@ def create_business(
     user: models.User = Depends(get_current_user)
 ):
     db_business = models.Business(**business.model_dump(), owner_id=user.uid)
-    user=db.query(models.User).filter(models.User.uid == user.uid).first()
-    if user.is_business:
+    if user.maxed_business:
         raise HTTPException(status_code=403, detail="User already has a business")
-    user.is_business=True
+    user.maxed_business=True
     db.add(db_business)
     db.commit()
     db.refresh(db_business)

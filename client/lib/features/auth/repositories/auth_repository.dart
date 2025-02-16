@@ -8,7 +8,6 @@ import 'package:nexdoor/common/core/theme/color_pallete.dart';
 import 'package:nexdoor/common/services/api_service.dart';
 import 'package:nexdoor/common/utils/shared_prefs/shared_prefs.dart';
 import 'package:nexdoor/features/settings_profile/models/user_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toastification/toastification.dart';
 
 // Contains Firebase Authentication handling functions and token initialisation
@@ -42,15 +41,14 @@ class AuthRepository {
         "phone_number": user.phoneNumber,
         "location": user.location
       });
-      log("Data: "+data.toString());
-      final Response<dynamic> response = await apiService.postData(
-        "/auth/signup",
+      log("Data: " + data.toString());
+      final Response<dynamic> response = await Dio().post(
+        "http://127.0.0.1:8000/api/v1/auth/signup",
         data: data,
       );
       if (response.statusCode == 201) {
         log("Returning true signUp(): $response $uid");
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("uid", uid);
+        await SharedPrefs.saveUserId(uid);
         return true;
       } else {
         throw Exception("Failed to register user in FastAPI");
@@ -84,13 +82,7 @@ class AuthRepository {
   /// **Logout**
   Future<void> logout() async {
     await _auth.signOut();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove("uid");
-  }
-
-//Firebase Sign out - done at first itself to avoid unneccessary calls from firebase service inApp
-  Future<void> fsignOut() async {
-    await _auth.signOut();
+    await SharedPrefs.clearUserId();
   }
 
 // Email verification

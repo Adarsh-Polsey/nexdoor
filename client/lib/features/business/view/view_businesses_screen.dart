@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:nexdoor/common/core/theme/color_pallete.dart';
+import 'package:nexdoor/features/business/repositories/business_repository.dart';
 import 'package:nexdoor/features/business/view/widgets/custom_popup_menu.dart';
+import 'package:nexdoor/features/business/models/business_model.dart';
 
-class PostScreen extends StatefulWidget {
-  const PostScreen({super.key});
+class ViewBusinessScreen extends StatefulWidget {
+  const ViewBusinessScreen({super.key});
 
   @override
-  State<PostScreen> createState() => _PostScreenState();
+  State<ViewBusinessScreen> createState() => _ViewBusinessScreenState();
 }
 
-class _PostScreenState extends State<PostScreen> {
+class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
   String selectedCategory = "All categories";
-
+  final BusinessRepository _repository = BusinessRepository();
+  List<BusinessModel> _businesses = [];
+  bool _isLoading = true;
+  String? _searchQuery;
   final List<String> categories = [
     "All categories",
     "Appliances",
@@ -34,9 +39,33 @@ class _PostScreenState extends State<PostScreen> {
     "Physical",
     "Hybrid",
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBusinesses();
+  }
+  Future<void> _fetchBusinesses() async {
+    try {
+      List<BusinessModel> businesses =
+          await _repository.fetchBusinesses(search: _searchQuery);
+      setState(() {
+        _businesses = businesses;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _businesses.isEmpty
+              ? const Center(child: Text("No businesses found"))
+              : SingleChildScrollView(
       padding: EdgeInsets.all(30),
       child: Column(
         children: [
@@ -72,7 +101,7 @@ class _PostScreenState extends State<PostScreen> {
                 crossAxisSpacing: 20,
                 mainAxisSpacing: 20,
                 mainAxisExtent: 260),
-            itemBuilder: (context, index) => _postCard(),
+            itemBuilder: (context, index) { return _postCard(_businesses[index]);},
             itemCount: 20,
             shrinkWrap: true,
             scrollDirection: Axis.vertical,
@@ -82,7 +111,7 @@ class _PostScreenState extends State<PostScreen> {
     );
   }
 
-  Widget _postCard() {
+  Widget _postCard(BusinessModel business) {
     return Container(
       decoration: BoxDecoration(
         boxShadow: [
@@ -123,7 +152,7 @@ class _PostScreenState extends State<PostScreen> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-            child: Text("Business Name",
+            child: Text(business.name,
                 style: TextStyle(fontWeight: FontWeight.bold)),
           ),
           Container(
@@ -133,14 +162,13 @@ class _PostScreenState extends State<PostScreen> {
                       borderRadius: BorderRadius.circular(9),
                       color: ColorPalette.primaryButtonSplash
                           .withValues(alpha: 0.2)),
-                  child: Text(
-                    "Category",
+                  child: Text(business.category,
                     style: TextStyle(fontSize: 12),
                   ),
                 ),
                 Padding(
             padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-            child: Text("Street Address                -  Toooo Large might be 3 to 4 lines",maxLines: 1,overflow: TextOverflow.ellipsis,
+            child: Text(business.description,maxLines: 1,overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],

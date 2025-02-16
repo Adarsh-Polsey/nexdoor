@@ -19,7 +19,8 @@ class User(Base):
     location = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     is_active = Column(Boolean, default=True)
-    is_business = Column(Boolean, default=False)
+    maxed_business = Column(Boolean, default=False)
+    maxed_services = Column(Boolean, default=False)
 
     # Relationships
     businesses = relationship("Business", back_populates="owner", lazy="joined", cascade="all, delete-orphan")
@@ -55,6 +56,11 @@ class Business(Base):
     products = relationship("Product", back_populates="business", lazy="joined", cascade="all, delete-orphan")
 
 # ✅ Service Model
+from sqlalchemy import Column, UUID, String, Text, Integer, Float, Boolean, JSON
+from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
+import uuid
+
 class Service(Base):
     __tablename__ = "services"
 
@@ -62,9 +68,11 @@ class Service(Base):
     business_id = Column(UUID(as_uuid=True), ForeignKey("businesses.id", ondelete="CASCADE"))
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
-    duration = Column(Integer, nullable=False)
+    duration = Column(Integer, nullable=False)  # Duration in minutes
     price = Column(Float, nullable=False)
     is_active = Column(Boolean, default=True)
+    available_days = Column(JSON, nullable=False, default=list)  # List of days (e.g., ["Monday", "Tuesday"])
+    available_hours = Column(JSON, nullable=False, default=list)  # List of hours (e.g., ["09:00-12:00", "14:00-18:00"])
 
     # Relationships
     business = relationship("Business", back_populates="services", lazy="joined")

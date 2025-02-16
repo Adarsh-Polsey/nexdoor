@@ -7,7 +7,8 @@ class UserModel {
   final String? location;
   final bool isVerified;
   final bool isActive;
-  final bool isBusiness;
+  final bool maxedBusiness;
+  final bool maxedServices;
   final List<String> savedBusinesses;
   final List<String> likedProducts;
   final List<String> followedCategories;
@@ -22,7 +23,8 @@ class UserModel {
     this.location = "",
     this.isVerified = false,
     this.isActive = true,
-    this.isBusiness=false,
+    this.maxedBusiness=false,
+    this.maxedServices=false,
     this.savedBusinesses = const [],
     this.likedProducts = const [],
     this.followedCategories = const [],
@@ -40,7 +42,8 @@ class UserModel {
       'location': location,
       'isVerified': isVerified,
       'isActive': isActive,
-      'isBusiness': isBusiness,
+      'maxedBusiness': maxedBusiness,
+      'maxedServices': maxedServices,
       'savedBusinesses': savedBusinesses,
       'likedProducts': likedProducts,
       'followedCategories': followedCategories,
@@ -59,7 +62,8 @@ class UserModel {
       location: map['location'],
       isVerified: map['is_verified'] ?? false,
       isActive: map['is_active'] ?? true,
-      isBusiness: map['is_business'] ?? false,
+      maxedBusiness: map['maxed_business'] ?? false,
+      maxedServices: map['maxed_services'] ?? false,
       savedBusinesses: List<String>.from(map['savedBusinesses'] ?? []),
       likedProducts: List<String>.from(map['liked_products'] ?? []),
       followedCategories: List<String>.from(map['followedCategories'] ?? []),
@@ -78,6 +82,8 @@ class UserModel {
       'location': location,
       'isVerified': isVerified,
       'isActive': isActive,
+      'maxedBusiness':maxedBusiness,
+      'maxedServices':maxedServices,
       'savedBusinesses': savedBusinesses,
       'likedProducts': likedProducts,
       'followedCategories': followedCategories,
@@ -96,7 +102,8 @@ class UserModel {
       location: json['location'],
       isVerified: json['is_verified'] ?? false,
       isActive: json['is_active'] ?? true,
-      isBusiness: json['is_business'] ?? false,
+      maxedBusiness: json['maxed_business'] ?? false,
+      maxedServices: json['maxed_services'] ?? false,
       savedBusinesses: List<String>.from(json['saved_businesses'] ?? []),
       likedProducts: List<String>.from(json['liked_products'] ?? []),
       followedCategories: List<String>.from(json['followed_categories'] ?? []),

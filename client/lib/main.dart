@@ -9,10 +9,11 @@ import 'package:nexdoor/features/blog/view/discussion_screen.dart';
 import 'package:nexdoor/features/business/view/view_businesses_screen.dart';
 import 'package:nexdoor/features/home/view/home_screen.dart';
 import 'package:nexdoor/features/settings_profile/view/create_business_screen.dart';
+import 'package:nexdoor/features/settings_profile/view/create_services_screen.dart';
 import 'package:nexdoor/features/settings_profile/view/manage_business_screen.dart';
 import 'package:nexdoor/features/settings_profile/view/settings_screen.dart';
-import 'package:nexdoor/features/settings_profile/viewmodel/business_viewmodel.dart';
-import 'package:nexdoor/features/settings_profile/viewmodel/user_viewmodel.dart';
+import 'package:nexdoor/features/settings_profile/viewmodel/services_viewmodel.dart';
+import 'package:nexdoor/features/settings_profile/viewmodel/profile_viewmodel.dart';
 import 'package:nexdoor/features/splash/view/splash_screen.dart';
 import 'package:nexdoor/firebase_options.dart';
 import 'package:provider/provider.dart';
@@ -24,8 +25,8 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => BusinessViewModel()),
-        ChangeNotifierProvider(create: (_) => UserViewModel()),
+        ChangeNotifierProvider(create: (_) => ProfileViewModel()),
+        ChangeNotifierProvider(create: (_) => ServiceViewModel()),
         // Add other providers here
    ], child: ToastificationWrapper(child: const MyApp())));
 }
@@ -50,10 +51,11 @@ class MyApp extends StatelessWidget {
         '/settings': (context) => SettingsScreen(),
         '/ai_chat_screen':(context)=>ChatScreen(),
         '/blog':(context)=>GroupScreen(),
-        '/view_businesses': (context) => PostScreen(),
+        '/view_businesses': (context) => ViewBusinessScreen(),
         // More - Settings screens
-        '/create_business': (context) => CreateBusinessScreen(),
         '/manage_business': (context) => ManageBusinessScreen(),
+        '/create_business': (context) => CreateBusinessScreen(),
+        '/create_services': (context) => AddServiceScreen(),
       },
       initialRoute: '/',
     );

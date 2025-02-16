@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:nexdoor/features/settings_profile/models/business_model.dart';
-import 'package:nexdoor/features/settings_profile/viewmodel/business_viewmodel.dart';
+import 'package:nexdoor/features/business/models/business_model.dart';
+import 'package:nexdoor/features/settings_profile/viewmodel/profile_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 class ManageBusinessScreen extends StatefulWidget {
@@ -52,12 +52,12 @@ class _ManageBusinessScreenState extends State<ManageBusinessScreen> {
   void initState() {
     super.initState();
     // Fetch business data when the screen is loaded
-    Future.microtask(() => Provider.of<BusinessViewModel>(context, listen: false).fetchABusiness());
+    Future.microtask(() => Provider.of<ProfileViewModel>(context, listen: false).fetchABusiness());
   }
 
   @override
   Widget build(BuildContext context) {
-    final businessViewModel = Provider.of<BusinessViewModel>(context);
+    final businessViewModel = Provider.of<ProfileViewModel>(context);
 
     // Populate form fields if business data is fetched
     if (businessViewModel.business != null && _nameController.text.isEmpty) {
@@ -207,7 +207,7 @@ class _ManageBusinessScreenState extends State<ManageBusinessScreen> {
                                   _selectedBusinessType != null &&
                                   _selectedCategory != null &&
                                   _selectedLocation != null) {
-                                final business = Business(
+                                final business = BusinessModel(
                                   id: businessViewModel.business?.id ?? '', // Use existing ID if editing
                                   name: _nameController.text,
                                   description: _descriptionController.text,

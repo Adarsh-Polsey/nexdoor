@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
@@ -15,12 +16,18 @@ def create_service(
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user)
 ):
-    """Creates a service under the logged-in user's business."""
-    business = db.query(models.Business).filter(models.Business.owner_id == user.id).first()
+    business = db.query(models.Business).filter(models.Business.owner_id == user.uid).first()
     if not business:
         raise HTTPException(status_code=403, detail="Not authorized to create services")
-
-    db_service = models.Service(**service.model_dump(), business_id=business.id)
+    if user.maxed_services:
+        raise HTTPException(status_code=403, detail="Business already has a Service")
+    user.maxed_services=True
+    db_service = models.Service(
+        **service.model_dump(),
+        business_id=business.id,
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+    )
     db.add(db_service)
     db.commit()
     db.refresh(db_service)
@@ -36,7 +43,6 @@ def list_services(
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user)
 ):
-    """Fetches services with optional business and search filters."""
     query = db.query(models.Service)
 
     if business_id:
@@ -76,7 +82,6 @@ def update_service(
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user)
 ):
-    """Allows business owners to update their services."""
     db_service = db.query(models.Service).filter(models.Service.id == service_id).first()
 
     if not db_service:
