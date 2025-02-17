@@ -45,6 +45,7 @@ class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
     super.initState();
     _fetchBusinesses();
   }
+
   Future<void> _fetchBusinesses() async {
     try {
       List<BusinessModel> businesses =
@@ -59,119 +60,130 @@ class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _businesses.isEmpty
-              ? const Center(child: Text("No businesses found"))
-              : SingleChildScrollView(
-      padding: EdgeInsets.all(30),
-      child: Column(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Row(
-              children: [
-                CustomPopupMenu(
-                  onSelected: (value) {
-                    setState(() {
-                      selectedCategory = value;
-                    });
-                  },
-                  items: categories,
+        ? const Center(child: CircularProgressIndicator())
+        : _businesses.isEmpty
+            ? const Center(child: Text("No businesses found"))
+            : SingleChildScrollView(
+                padding: EdgeInsets.all(30),
+                child: Column(
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Row(
+                        children: [
+                          CustomPopupMenu(
+                            onSelected: (value) {
+                              setState(() {
+                                selectedCategory = value;
+                              });
+                            },
+                            items: categories,
+                          ),
+                          SizedBox(width: 20),
+                          CustomPopupMenu(
+                            onSelected: (value) {
+                              setState(() {
+                                selectedBusinessType = value;
+                              });
+                            },
+                            items: businessTypes,
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    // _reminderCard(),
+                    GridView.builder(
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 300,
+                          crossAxisSpacing: 20,
+                          mainAxisSpacing: 20,
+                          mainAxisExtent: 260),
+                      itemBuilder: (context, index) {
+                        return _postCard(_businesses[index], () {
+                          // Navigator.pushNamed();
+                        });
+                      },
+                      itemCount: _businesses.length,
+                      shrinkWrap: true,
+                      scrollDirection: Axis.vertical,
+                    ),
+                  ],
                 ),
-                SizedBox(width: 20),
-                CustomPopupMenu(
-                  onSelected: (value) {
-                    setState(() {
-                      selectedBusinessType = value;
-                    });
-                  },
-                  items: businessTypes,
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 10),
-          // _reminderCard(),
-          GridView.builder(
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 300,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
-                mainAxisExtent: 260),
-            itemBuilder: (context, index) { return _postCard(_businesses[index]);},
-            itemCount: 20,
-            shrinkWrap: true,
-            scrollDirection: Axis.vertical,
-          ),
-        ],
-      ),
-    );
+              );
   }
 
-  Widget _postCard(BusinessModel business) {
-    return Container(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-              blurRadius: 4,
-              color: Colors.grey.shade300,
-              spreadRadius: 2,
-              offset: Offset(0, 2)),
-          BoxShadow(
-              blurRadius: 4,
-              color: Colors.grey.shade300,
-              spreadRadius: 2,
-              offset: Offset(0, -2)),
-        ],
-        color: ColorPalette.backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12))),
-            child: SizedBox(
-              height: 175,
-              width: double.infinity,
-              child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12)),
-                child: Image.network(
-                    fit: BoxFit.fitWidth,
-                    "https://images.unsplash.com/photo-1574158622682-e40e69881006"),
+  Widget _postCard(BusinessModel business, void Function()? onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+                blurRadius: 4,
+                color: Colors.grey.shade300,
+                spreadRadius: 2,
+                offset: Offset(0, 2)),
+            BoxShadow(
+                blurRadius: 4,
+                color: Colors.grey.shade300,
+                spreadRadius: 2,
+                offset: Offset(0, -2)),
+          ],
+          color: ColorPalette.backgroundColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12))),
+              child: SizedBox(
+                height: 175,
+                width: double.infinity,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12)),
+                  child: Image.network(
+                      fit: BoxFit.fitWidth,
+                      "https://images.unsplash.com/photo-1574158622682-e40e69881006"),
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-            child: Text(business.name,
-                style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-          Container(
-                  padding: EdgeInsets.symmetric(vertical: 3, horizontal: 5),
-                  margin: EdgeInsets.all(3),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(9),
-                      color: ColorPalette.primaryButtonSplash
-                          .withValues(alpha: 0.2)),
-                  child: Text(business.category,
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ),
-                Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-            child: Text(business.description,maxLines: 1,overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
+              child: Text(business.name,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 3, horizontal: 5),
+              margin: EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(9),
+                  color:
+                      ColorPalette.primaryButtonSplash.withValues(alpha: 0.2)),
+              child: Text(
+                business.category,
+                style: TextStyle(fontSize: 12),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
+              child: Text("📍${business.location}",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
       ),
     );
   }

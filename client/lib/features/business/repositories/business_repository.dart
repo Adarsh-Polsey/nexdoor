@@ -8,7 +8,7 @@ final ApiService apiService=ApiService();
   Future<List<BusinessModel>> fetchBusinesses({String? search}) async {
     try {
       final response = await apiService.getData(
-        "/list_businesses",
+        "/businesses/list_businesses",
         queryParameters: search != null ? {"search": search} : {},
       );
 

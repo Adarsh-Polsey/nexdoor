@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
@@ -9,19 +10,39 @@ from database import get_db
 router = APIRouter()
 
 # ✅ Create Business
-@router.post("/create_business", response_model=schemas.Business,status_code=201)
+@router.post("/create_business", response_model=schemas.Business)
 def create_business(
     business: schemas.BusinessCreate,
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user)
 ):
-    db_business = models.Business(**business.model_dump(), owner_id=user.uid)
-    if user.maxed_business:
-        raise HTTPException(status_code=403, detail="User already has a business")
-    user.maxed_business=True
+    if not user.maxed_business:
+        raise HTTPException(status_code=403, detail="Not authorized to create a business")
+
+    # Create the business
+    db_business = models.Business(
+        **business.model_dump(exclude={"services"}),
+        owner_id=user.uid,
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+    )
     db.add(db_business)
     db.commit()
     db.refresh(db_business)
+
+    # Create the services
+    for service_data in business.services:
+        db_service = models.Service(
+            **service_data.model_dump(),
+            business_id=db_business.id,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        )
+        db.add(db_service)
+
+    db.commit()
+    db.refresh(db_business)
+
     return db_business
 
 # ✅ List Businesses (With Optional Search)
