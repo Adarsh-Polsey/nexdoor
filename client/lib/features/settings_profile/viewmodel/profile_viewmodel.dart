@@ -67,7 +67,7 @@ class ProfileViewModel with ChangeNotifier {
       }
     } catch (e,s) {
       _errorMessage = 'Failed to fetch business: $e';
-      print("$_errorMessage : $s");
+      log("$_errorMessage : $s");
       return null;
     } finally {
       _isLoading = false;
@@ -76,29 +76,30 @@ class ProfileViewModel with ChangeNotifier {
   }
 
   // Create a new business
-  Future<bool> createBusiness(BusinessModel business) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
+   Future<bool> createBusinessWithServices(BusinessModel business) async {
     try {
-      final Response response = await _apiService.postData(
+      // Ensure the business has required related data
+      if (business.services.isEmpty) {
+        log('Services list is empty or null');
+        return false;
+      }
+
+      // Call the API to create business with services
+      final response = await _apiService.postData(
         '/businesses/create_business',
         data: business.toJson(),
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        log('Business created successfully with services');
         return true;
       } else {
-        throw Exception('Failed to create business');
+        log('Failed to create business: ${response.statusMessage}');
+        return false;
       }
     } catch (e) {
-      _errorMessage = 'Failed to create business: $e';
-      print(_errorMessage);
+      log('Error creating business: $e');
       return false;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
   }
 
@@ -121,7 +122,34 @@ class ProfileViewModel with ChangeNotifier {
       }
     } catch (e) {
       _errorMessage = 'Failed to update business: $e';
-      print(_errorMessage);
+      log("Error : $_errorMessage");
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+
+Future<bool> updateService(BusinessModel business) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final Response response = await _apiService.postData(
+        '/services/update_service',
+        data: business.toJson(),
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Exception('Failed to update business');
+      }
+    } catch (e) {
+      _errorMessage = 'Failed to update business: $e';
+      log("Error Message $_errorMessage");
       return false;
     } finally {
       _isLoading = false;

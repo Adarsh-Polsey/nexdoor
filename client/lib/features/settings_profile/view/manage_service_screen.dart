@@ -4,19 +4,25 @@ import 'package:nexdoor/features/business/models/services_model.dart';
 import 'package:nexdoor/features/settings_profile/viewmodel/services_viewmodel.dart';
 import 'package:provider/provider.dart';
 
-class AddServiceScreen extends StatefulWidget {
-  const AddServiceScreen({super.key});
+class ManageServiceScreen extends StatefulWidget {
+  final String? serviceId; // Optional - if null, load the user's first service
+
+  const ManageServiceScreen({this.serviceId, super.key});
 
   @override
-  State<AddServiceScreen> createState() => _AddServiceScreenState();
+  State<ManageServiceScreen> createState() => _ManageServiceScreenState();
 }
 
-class _AddServiceScreenState extends State<AddServiceScreen> {
+class _ManageServiceScreenState extends State<ManageServiceScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _durationController = TextEditingController();
   final _priceController = TextEditingController();
+  
+  bool _isLoading = true;
+  bool _isUpdating = false;
+  ServiceModel? _currentService;
 
   // Time slots for each day
   final Map<String, Map<String, bool>> _availability = {
@@ -29,46 +35,112 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
     'Sunday': {},
   };
 
-  // Initialize time slots for each day
   @override
   void initState() {
     super.initState();
-    // Generate time slots from 9 AM to 6 PM
+    // Initialize time slots from 9 AM to 6 PM
     for (var day in _availability.keys) {
       for (var hour = 9; hour <= 18; hour++) {
         String timeSlot = '${hour.toString().padLeft(2, '0')}:00';
         _availability[day]![timeSlot] = false;
       }
     }
+    
+    // Load service data after widget is inserted into the tree
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadServiceData();
+    });
+  }
+
+  Future<void> _loadServiceData() async {
+    final serviceViewModel = Provider.of<ServiceViewModel>(context, listen: false);
+    
+    try {
+      ServiceModel service;
+      if (widget.serviceId != null) {
+        // Load specific service by ID
+        service = await serviceViewModel.getServiceById(widget.serviceId!);
+      } else {
+        // Load the first service for the current user
+        final services = await serviceViewModel.getServices();
+        if (services.isEmpty) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('No services found. Create a new service instead.')),
+            );
+            Navigator.pop(context);
+          }
+          return;
+        }
+        service = services.first;
+      }
+      
+      // Populate form fields
+      _populateFormFields(service);
+      
+      setState(() {
+        _currentService = service;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load service: ${e.toString()}')),
+        );
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  void _populateFormFields(ServiceModel service) {
+    _nameController.text = service.name;
+    _descriptionController.text = service.description;
+    _durationController.text = service.duration.toString();
+    _priceController.text = service.price.toString();
+    
+    // Set availability
+    if (service.availableDays.isNotEmpty && service.availableHours.isNotEmpty) {
+      for (var i = 0; i < service.availableDays.length; i++) {
+        String day = service.availableDays[i];
+        List<String> hours = service.availableHours;
+        
+        // Mark hours as available
+        for (var hour in hours) {
+          if (_availability[day]!.containsKey(hour)) {
+            _availability[day]![hour] = true;
+          }
+        }
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final serviceViewModel = Provider.of<ServiceViewModel>(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Service'),
+        title: const Text('Manage Service'),
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildServiceDetailsSection(),
-                const SizedBox(height: 24),
-                _buildAvailabilitySection(),
-                const SizedBox(height: 24),
-                _buildSubmitButton(serviceViewModel),
-              ],
+      body: _isLoading 
+        ? const Center(child: CircularProgressIndicator())
+        : SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildServiceDetailsSection(),
+                    const SizedBox(height: 24),
+                    _buildAvailabilitySection(),
+                    const SizedBox(height: 24),
+                    _buildSubmitButton(),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
     );
   }
 
@@ -298,52 +370,86 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
     return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
   }
 
-  Widget _buildSubmitButton(ServiceViewModel serviceViewModel) {
+  Widget _buildSubmitButton() {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () => _submitForm(serviceViewModel),
+        onPressed: _isUpdating ? null : _updateService,
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-        child: const Text('Add Service'),
+        child: _isUpdating
+            ? const CircularProgressIndicator()
+            : const Text('Update Service'),
       ),
     );
   }
 
-  Future<void> _submitForm(ServiceViewModel serviceViewModel) async {
-    if (_formKey.currentState!.validate()) {
-      // Create availability schedule
-      final schedule = <String, List<String>>{};
-      for (var day in _availability.keys) {
-        schedule[day] = _availability[day]!
-            .entries
-            .where((entry) => entry.value)
-            .map((entry) => entry.key)
-            .toList();
-      }
+  Future<void> _updateService() async {
+    if (_formKey.currentState!.validate() && _currentService != null) {
+      setState(() {
+        _isUpdating = true;
+      });
 
-      // Create service object
-      final service = ServiceModel(
-        id: "",
-        name: _nameController.text,
-        description: _descriptionController.text,
-        duration: int.parse(_durationController.text),
-        price: double.parse(_priceController.text),
-        availableDays: schedule['day'] ?? [],
-        availableHours: schedule['hour'] ?? [],
-      );
+      try {
+        final serviceViewModel = Provider.of<ServiceViewModel>(context, listen: false);
+        
+        // Create availability schedule
+        final Map<String, List<String>> schedule = {};
+        List<String> availableDays = [];
 
-      // Send to the ViewModel
-      final success = await serviceViewModel.createService(service);
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Service added successfully')),
+        for (var day in _availability.keys) {
+          List<String> availableHours = _availability[day]!
+              .entries
+              .where((entry) => entry.value)
+              .map((entry) => entry.key)
+              .toList();
+          
+          if (availableHours.isNotEmpty) {
+            availableDays.add(day);
+            schedule[day] = availableHours;
+          }
+        }
+
+        // Create updated service object
+        final updatedService = ServiceModel(
+          id: _currentService!.id,
+          name: _nameController.text,
+          description: _descriptionController.text,
+          duration: int.parse(_durationController.text),
+          price: double.parse(_priceController.text),
+          availableDays: availableDays,
+          availableHours: schedule.values.expand((hours) => hours).toList(),
         );
-        Navigator.pop(context);
+
+        // Update via ViewModel
+        final success = await serviceViewModel.updateService(updatedService);
+        
+        if (success && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Service updated successfully')),
+          );
+          Navigator.pop(context);
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to update service')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error updating service: ${e.toString()}')),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isUpdating = false;
+          });
+        }
       }
     }
   }

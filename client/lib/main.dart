@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
         '/view_businesses': (context) => ViewBusinessScreen(),
         // More - Settings screens
         '/manage_business': (context) => ManageBusinessScreen(),
-        '/create_business': (context) => CreateBusinessScreen(),
+        '/create_business': (context) => CreateBusinessWithServiceScreen(),
         '/create_services': (context) => AddServiceScreen(),
       },
       initialRoute: '/',

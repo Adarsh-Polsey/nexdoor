@@ -61,36 +61,36 @@ def list_services(
 
 # ✅ Get Service by ID
 @router.get("/get_service/{service_id}", response_model=schemas.Service)
+@router.get("/get_service", response_model=List[schemas.Service])  # Return a list of services
 def get_service(
-    service_id: str,
+    service_id: Optional[str] = None, 
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user)
 ):
-    """Retrieves a service by its ID."""
-    service = db.query(models.Service).filter(models.Service.id == service_id).first()
+    if service_id:
+        service = db.query(models.Service).filter(models.Service.id == service_id).first()
+        if not service:
+            raise HTTPException(status_code=404, detail="Service not found")
+        return service
 
-    if not service:
-        raise HTTPException(status_code=404, detail="Service not found")
+    services = db.query(models.Service).filter(models.Service.owner_id == user.uid).first()
 
-    return service
+    if not services:
+        raise HTTPException(status_code=404, detail="No services found for the current user")
+
+    return services 
 
 # ✅ Update Service (Only Business Owners)
-@router.put("/update_service/{service_id}", response_model=schemas.Service)
+@router.post("/update_service", response_model=schemas.Service)
 def update_service(
-    service_id: str,
     service_update: schemas.ServiceCreate,
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user)
 ):
-    db_service = db.query(models.Service).filter(models.Service.id == service_id).first()
+    db_service = db.query(models.Service).filter(models.Service.owner_id == user.id).first()
 
     if not db_service:
         raise HTTPException(status_code=404, detail="Service not found")
-
-    # Ensure the user owns the business that created the service
-    business = db.query(models.Business).filter(models.Business.id == db_service.business_id, models.Business.owner_id == user.id).first()
-    if not business:
-        raise HTTPException(status_code=403, detail="Not authorized to update this service")
 
     for key, value in service_update.model_dump().items():
         setattr(db_service, key, value)

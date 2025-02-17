@@ -1,6 +1,6 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, or_
 from typing import List, Optional
 from routers.auth import get_current_user
@@ -16,7 +16,7 @@ def create_business(
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user)
 ):
-    if not user.maxed_business:
+    if user.maxed_business:
         raise HTTPException(status_code=403, detail="Not authorized to create a business")
 
     # Create the business
@@ -29,7 +29,7 @@ def create_business(
     db.add(db_business)
     db.commit()
     db.refresh(db_business)
-
+    user.maxed_business=True
     # Create the services
     for service_data in business.services:
         db_service = models.Service(
@@ -42,7 +42,7 @@ def create_business(
 
     db.commit()
     db.refresh(db_business)
-
+    user.maxed_services=True
     return db_business
 
 # ✅ List Businesses (With Optional Search)
@@ -54,8 +54,7 @@ def list_businesses(
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user)
 ):
-    """Fetches all businesses, with optional fuzzy search."""
-    query = db.query(models.Business)
+    query = db.query(models.Business).options(joinedload(models.Business.services))
 
     if search:
         search = search.strip()
@@ -71,7 +70,7 @@ def list_businesses(
 
 # ✅ Get Business by ID
 @router.get("/get_business/{business_id}", response_model=schemas.Business)
-@router.get("/get_business/", response_model=schemas.Business)
+@router.get("/get_business", response_model=schemas.Business)
 def get_business(
     business_id: str = None,  
     db: Session = Depends(get_db),
@@ -89,7 +88,7 @@ def get_business(
     return business
 
 # ✅ Update Business (Only Owner Can Update)
-@router.post("/update_business/", response_model=schemas.Business)
+@router.post("/update_business", response_model=schemas.Business)
 def update_business(
     business_update: schemas.BusinessCreate,
     db: Session = Depends(get_db),

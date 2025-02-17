@@ -25,7 +25,6 @@ class ServiceBase(BaseModel):
     description: Optional[str] = None
     duration: int  # In minutes
     price: float
-    is_active: bool = True
     available_days: List[str] = Field(default_factory=list)  # List of days (e.g., ["Monday", "Tuesday"])
     available_hours: List[str] = Field(default_factory=list)  # List of hours (e.g., ["09:00-12:00", "14:00-18:00"])
 
@@ -42,6 +41,16 @@ class BusinessBase(BaseModel):
     website: Optional[str] = None
     allows_delivery: bool = False
 
+class Service(ServiceBase):
+    id: UUID4
+    business_id: UUID4
+    is_active: bool = True
+    created_at: datetime  # Timestamp when the service was created
+    updated_at: Optional[datetime] = None  # Timestamp when the service was last updated
+
+    class Config:
+        from_attributes = True
+        
 class BusinessCreate(BusinessBase):
     services: List[ServiceBase]
 class Business(BusinessBase):
@@ -50,21 +59,13 @@ class Business(BusinessBase):
     is_active: bool = True
     created_at: datetime
     updated_at: Optional[datetime] = None
+    services: List[Service] = []  
 
     class Config:
         from_attributes = True
 
 class ServiceCreate(ServiceBase):
-    business_id: UUID4
-
-class Service(ServiceBase):
-    id: UUID4
-    business_id: UUID4
-    created_at: datetime  # Timestamp when the service was created
-    updated_at: Optional[datetime] = None  # Timestamp when the service was last updated
-
-    class Config:
-        from_attributes = True
+    pass
 
 # ✅ Booking Status Enum
 class BookingStatus(str, Enum):

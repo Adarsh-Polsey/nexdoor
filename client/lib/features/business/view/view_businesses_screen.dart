@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:nexdoor/common/core/theme/color_pallete.dart';
 import 'package:nexdoor/features/business/repositories/business_repository.dart';
@@ -48,8 +50,11 @@ class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
 
   Future<void> _fetchBusinesses() async {
     try {
+      log("Fetching business");
       List<BusinessModel> businesses =
           await _repository.fetchBusinesses(search: _searchQuery);
+      log("Fetched business");
+          log("Businesses : $businesses");
       setState(() {
         _businesses = businesses;
         _isLoading = false;

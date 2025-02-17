@@ -24,6 +24,7 @@ class User(Base):
 
     # Relationships
     businesses = relationship("Business", back_populates="owner", lazy="joined", cascade="all, delete-orphan")
+    services = relationship("Service", back_populates="owner", lazy="joined", cascade="all, delete-orphan")
     bookings = relationship("Booking", back_populates="user", lazy="joined", cascade="all, delete-orphan")
 
     # Default empty list for saved businesses and liked products
@@ -39,7 +40,7 @@ class Business(Base):
     name = Column(String, index=True, nullable=False)
     description = Column(Text, nullable=True)
     category = Column(String, nullable=False)
-    business_type=Column(String, nullable=False)
+    business_type = Column(String, nullable=False)
     location = Column(String, nullable=False)
     address = Column(String, nullable=False)
     phone = Column(String, nullable=True)
@@ -66,6 +67,7 @@ class Service(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     business_id = Column(UUID(as_uuid=True), ForeignKey("businesses.id", ondelete="CASCADE"))
+    owner_id = Column(String, ForeignKey("users.uid", ondelete="CASCADE"))
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     duration = Column(Integer, nullable=False)  # Duration in minutes
@@ -73,10 +75,13 @@ class Service(Base):
     is_active = Column(Boolean, default=True)
     available_days = Column(JSON, nullable=False, default=list)  # List of days (e.g., ["Monday", "Tuesday"])
     available_hours = Column(JSON, nullable=False, default=list)  # List of hours (e.g., ["09:00-12:00", "14:00-18:00"])
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
     business = relationship("Business", back_populates="services", lazy="joined")
     bookings = relationship("Booking", back_populates="service", lazy="joined", cascade="all, delete-orphan")
+    owner = relationship("User", back_populates="services", lazy="joined")
 
 # ✅ Booking Model
 class Booking(Base):

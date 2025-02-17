@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nexdoor/features/business/models/business_model.dart';
-import 'package:nexdoor/features/settings_profile/models/services_model.dart';
+import 'package:nexdoor/features/business/models/services_model.dart';
 import 'package:nexdoor/features/settings_profile/viewmodel/profile_viewmodel.dart';
-import 'package:nexdoor/features/settings_profile/viewmodel/services_viewmodel.dart';
 import 'package:provider/provider.dart';
 
-class CreateBusinessScreen extends StatefulWidget {
-  const CreateBusinessScreen({super.key});
+class CreateBusinessWithServiceScreen extends StatefulWidget {
+  const CreateBusinessWithServiceScreen({super.key});
 
   @override
-  State<CreateBusinessScreen> createState() => _CreateBusinessScreenState();
+  State<CreateBusinessWithServiceScreen> createState() => _CreateBusinessWithServiceScreenState();
 }
 
-class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
+class _CreateBusinessWithServiceScreenState extends State<CreateBusinessWithServiceScreen> {
   final _formKey = GlobalKey<FormState>();
   
   // Business controllers
@@ -87,11 +86,10 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
   @override
   Widget build(BuildContext context) {
     final businessViewModel = Provider.of<ProfileViewModel>(context);
-    final serviceViewModel = Provider.of<ServiceViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Business & Service'),
+        title: const Text('Create Business'),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -252,7 +250,7 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
                           child: _buildInputField(
                             controller: _priceController,
                             label: 'Price',
-                            prefixText: '\Rs.',
+                            prefixText: 'Rs.',
                             keyboardType: TextInputType.number,
                             inputFormatters: [
                               FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
@@ -273,8 +271,7 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
                   'Service Hours',
                   [
                     ...['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-                        .map((day) => _buildDayTimeSelector(day))
-                        .toList(),
+                        .map((day) => _buildDayTimeSelector(day)).toList(),
                   ],
                 ),
                 
@@ -282,11 +279,11 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
                 
                 // Submit Button
                 ElevatedButton(
-                  onPressed: () => _submitForm(businessViewModel, serviceViewModel),
+                  onPressed: () => _submitForm(businessViewModel),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: const Text('Create Business & Service'),
+                  child: const Text('Create Business'),
                 ),
                 
                 const SizedBox(height: 24),
@@ -491,88 +488,83 @@ class _CreateBusinessScreenState extends State<CreateBusinessScreen> {
     final parts = timeString.split(':');
     return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
   }
+Future<void> _submitForm(ProfileViewModel businessViewModel) async {
+  if (_formKey.currentState!.validate() &&
+      _selectedBusinessType != null &&
+      _selectedCategory != null &&
+      _selectedLocation != null) {
+    try {
+      // Extract selected days and hours
+      final selectedDays = <String>[];
+      final selectedHours = <String>[];
 
-  Future<void> _submitForm(ProfileViewModel businessViewModel, ServiceViewModel serviceViewModel) async {
-    if (_formKey.currentState!.validate() &&
-        _selectedBusinessType != null &&
-        _selectedCategory != null &&
-        _selectedLocation != null) {
-      
-      try {
-        // 1. Create business first
-        final business = BusinessModel(
-          id: '',
-          name: _nameController.text,
-          description: _descriptionController.text,
-          category: _selectedCategory ?? "",
-          address: _selectedLocation ?? "",
-          phone: _phoneController.text,
-          email: _emailController.text,
-          website: _websiteController.text,
-          allowsDelivery: _allowsDelivery,
-          ownerId: '',
-          isActive: true,
-          createdAt: DateTime.now(),
-          businessType: _selectedBusinessType ?? "",
-          location: _selectedLocation ?? "",
-        );
-        
-        final businessResponse = await businessViewModel.createBusiness(business);
-        
-        if (businessResponse == true) {
-          // 2. Create service after business is created
-          // Create availability schedule
-          final schedule = <String, List<String>>{};
-          for (var day in _availability.keys) {
-            schedule[day] = _availability[day]!
-                .entries
-                .where((entry) => entry.value)
-                .map((entry) => entry.key)
-                .toList();
-          }
+      for (var day in _availability.keys) {
+        final timeSlots = _availability[day]!;
+        final selectedTimeSlots = timeSlots.entries
+            .where((entry) => entry.value) // Filter selected time slots
+            .map((entry) => entry.key) // Extract time slot strings
+            .toList();
 
-          // Create service object
-          final service = Service(
-            name: _serviceNameController.text,
-            description: _serviceDescriptionController.text,
-            duration: int.parse(_durationController.text),
-            price: double.parse(_priceController.text),
-            availability: schedule,
-          );
-
-          // Create service
-          final serviceResponse = await serviceViewModel.createService(service);
-          
-          if (serviceResponse && mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Business and service created successfully')),
-            );
-            Navigator.pushNamedAndRemoveUntil(context, "/home", (route) => false);
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Failed to create service')),
-            );
-          }
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to create business')),
-          );
+        if (selectedTimeSlots.isNotEmpty) {
+          selectedDays.add(day); // Add the day to selected days
+          selectedHours.addAll(selectedTimeSlots); // Add time slots to selected hours
         }
-      } catch (e) {
-        print(e);
+      }
+
+      // Create service object
+      final service = ServiceModel(
+        id: "", // ID will be generated by the backend
+        name: _serviceNameController.text,
+        description: _serviceDescriptionController.text,
+        duration: int.parse(_durationController.text),
+        price: double.parse(_priceController.text),
+        availableDays: selectedDays, // Pass selected days
+        availableHours: selectedHours, // Pass selected hours
+      );
+
+      // Create business object
+      final business = BusinessModel(
+        name: _nameController.text,
+        description: _descriptionController.text,
+        category: _selectedCategory ?? "",
+        address: _selectedLocation ?? "",
+        phone: _phoneController.text,
+        email: _emailController.text,
+        website: _websiteController.text,
+        allowsDelivery: _allowsDelivery,
+        isActive: true,
+        businessType: _selectedBusinessType ?? "",
+        location: _selectedLocation ?? "",
+        services: [service], // Include the service in the business creation
+      );
+
+      // Submit everything in one go
+      final response = await businessViewModel.createBusinessWithServices(business);
+
+      if (response == true && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error occurred: $e')),
+          const SnackBar(content: Text('Business and service created successfully')),
+        );
+        Navigator.pushNamedAndRemoveUntil(context, "/home", (route) => false);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to create business and service')),
         );
       }
-    } else {
+    } catch (e) {
+      print(e);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill all required fields'),
-        ),
+        SnackBar(content: Text('Error occurred: $e')),
       );
     }
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please fill all required fields'),
+      ),
+    );
   }
-
+}
   @override
   void dispose() {
     // Dispose business controllers

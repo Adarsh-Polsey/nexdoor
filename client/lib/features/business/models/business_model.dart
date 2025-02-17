@@ -1,79 +1,88 @@
+import 'package:nexdoor/features/business/models/services_model.dart';
+
 class BusinessModel {
-  final String id;
+  final String? id;
   final String name;
   final String description;
-  final String businessType;
-  final String location;
   final String category;
   final String address;
   final String phone;
   final String email;
   final String website;
   final bool allowsDelivery;
-  final String ownerId;
-  final bool isActive;
-  final DateTime createdAt;
+  final String? ownerId;
+  final bool? isActive;
+  final DateTime? createdAt;
   final DateTime? updatedAt;
+  final String businessType;
+  final String location;
+  final List<ServiceModel> services;
 
   BusinessModel({
-    required this.id,
+     this.id,
     required this.name,
     required this.description,
-    required this.location,
-    required this.businessType,
     required this.category,
     required this.address,
     required this.phone,
     required this.email,
     required this.website,
     required this.allowsDelivery,
-    required this.ownerId,
-    required this.isActive,
-    required this.createdAt,
-    this.updatedAt,
+     this.ownerId,
+     this.isActive,
+     this.createdAt,
+     this.updatedAt,
+    required this.businessType,
+    required this.location,
+    required this.services,
   });
 
-  // ✅ Convert JSON to Business object
   factory BusinessModel.fromJson(Map<String, dynamic> json) {
     return BusinessModel(
-      id: json['id'],
-      name: json['name'],
-      description: json['description'],
-      category: json['category'],
-      address: json['address'],
-      phone: json['phone'],
-      email: json['email'],
-      website: json['website'],
-      allowsDelivery: json['allows_delivery'],
-      ownerId: json['owner_id'],
-      isActive: json['is_active'],
-      createdAt: DateTime.parse(json['created_at']),
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
+      category: json['category'] ?? '',
+      address: json['address'] ?? '',
+      phone: json['phone'] ?? '',
+      email: json['email'] ?? '',
+      website: json['website'] ?? '',
+      allowsDelivery: json['allows_delivery'] ?? false,
+      ownerId: json['owner_id'] ?? '',
+      isActive: json['is_active'] ?? true,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'])
-          : null,
-      businessType: json['business_type'],
-      location: json['location'],
+          : DateTime.now(),
+      businessType: json['business_type'] ?? '',
+      location: json['location'] ?? '',
+      services: (json['services'] as List<dynamic>?)
+              ?.map((service) => ServiceModel.fromJson(service as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
   }
 
-  // ✅ Convert Business object to JSON
   Map<String, dynamic> toJson() {
     return {
-      "id": id,
-      "name": name,
-      "description": description,
-      "business_type": businessType,
-      "category": category,
-      "address": address,
-      "location": location,
-      "phone": phone,
-      "email": email,
-      "website": website,
-      "allows_delivery": allowsDelivery,
-      "owner_id": ownerId,
-      "is_active": isActive,
-      "created_at": createdAt.toIso8601String(),
-      "updated_at": updatedAt?.toIso8601String(),
+      'id': id,
+      'name': name,
+      'description': description,
+      'category': category,
+      'address': address,
+      'phone': phone,
+      'email': email,
+      'website': website,
+      'allows_delivery': allowsDelivery,
+      'owner_id': ownerId,
+      'is_active': isActive,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+      'business_type': businessType,
+      'location': location,
+      'services': services.map((s) => s.toJson()).toList(),
     };
   }
 }

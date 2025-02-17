@@ -221,17 +221,12 @@ class _ManageBusinessScreenState extends State<ManageBusinessScreen> {
                                   allowsDelivery: _allowsDelivery,
                                   ownerId: businessViewModel.business?.ownerId ?? '', // Use existing owner ID if editing
                                   isActive: true,
-                                  createdAt: businessViewModel.business?.createdAt ?? DateTime.now(), // Use existing creation date if editing
+                                  createdAt: businessViewModel.business?.createdAt ?? DateTime.now(),
+                                  services: [] // Use existing creation date if editing
                                 );
 
-                                if (businessViewModel.business != null) {
                                   // Update existing business
                                   await businessViewModel.updateBusiness(business);
-                                } else {
-                                  // Create new business
-                                  await businessViewModel.createBusiness(business);
-                                }
-
                                 if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(

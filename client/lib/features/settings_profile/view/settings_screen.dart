@@ -63,7 +63,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         if(maxedServices)...[
                           _buildSettingsBox(
                           icon: Icons.add_business_outlined,
-                          label: 'Manage Service',
+                          label: 'Manage Services',
                           onTap: () {
                             // Navigator.pushNamed(context, '/create_services');
                           },
