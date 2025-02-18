@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:nexdoor/common/services/api_service.dart';
+import 'package:nexdoor/features/business/models/booking_model.dart';
 import '../models/business_model.dart';
 
 class BusinessRepository {
@@ -27,4 +28,33 @@ class BusinessRepository {
       throw Exception("Error fetching businesses: $e");
     }
   }
+   Future<List<String>> fetchUnavailableHours(String serviceId) async {
+    try {
+      final response = await apiService.getData('/api/v1/bookings/list_booking?service_id=$serviceId');
+      final bookings = response.body as List<dynamic>;
+      return bookings.map((booking) => booking['time_slot'] as String).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch unavailable hours: $e');
+    }
+  }
+
+  Future<bool> createBooking(String serviceId, String timeSlot) async {
+    try {
+      final booking = BookingModel(
+        id: '',  // Will be assigned by server
+        serviceId: serviceId,
+        timeSlot: timeSlot,
+        status: 'pending',
+      );
+      
+      final response = await apiService.postData(
+        '/api/v1/bookings/create_booking',data:booking.toJson(),
+      );
+      
+      return response.statusCode == 201;
+    } catch (e) {
+      throw Exception('Failed to create booking: $e');
+    }
+  }
+
 }
