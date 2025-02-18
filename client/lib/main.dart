@@ -11,6 +11,7 @@ import 'package:nexdoor/features/home/view/home_screen.dart';
 import 'package:nexdoor/features/settings_profile/view/create_business_screen.dart';
 import 'package:nexdoor/features/settings_profile/view/create_services_screen.dart';
 import 'package:nexdoor/features/settings_profile/view/manage_business_screen.dart';
+import 'package:nexdoor/features/settings_profile/view/manage_service_screen.dart';
 import 'package:nexdoor/features/settings_profile/view/settings_screen.dart';
 import 'package:nexdoor/features/settings_profile/viewmodel/services_viewmodel.dart';
 import 'package:nexdoor/features/settings_profile/viewmodel/profile_viewmodel.dart';
@@ -54,6 +55,7 @@ class MyApp extends StatelessWidget {
         '/view_businesses': (context) => ViewBusinessScreen(),
         // More - Settings screens
         '/manage_business': (context) => ManageBusinessScreen(),
+        '/manage_services': (context) => ManageServiceScreen(),
         '/create_business': (context) => CreateBusinessWithServiceScreen(),
         '/create_services': (context) => AddServiceScreen(),
       },

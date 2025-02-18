@@ -60,24 +60,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             Navigator.pushNamed(context, '/manage_business');
                           },
                         ),
-                        if(maxedServices)...[
+                        
                           _buildSettingsBox(
                           icon: Icons.add_business_outlined,
-                          label: 'Manage Services',
+                          label: 'Manage Service',
                           onTap: () {
-                            // Navigator.pushNamed(context, '/create_services');
+                            Navigator.pushNamed(context, '/manage_services');
                           },
                         ),
-                        ],
-                        if(!maxedServices)...[
-                          _buildSettingsBox(
-                          icon: Icons.add_business_outlined,
-                          label: 'Add Service',
-                          onTap: () {
-                            Navigator.pushNamed(context, '/create_services');
-                          },
-                        ),
-                        ]    
                       ],
                       _buildSettingsBox(
                         icon: Icons.edit_outlined,

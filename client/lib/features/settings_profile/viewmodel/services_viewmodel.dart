@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -42,32 +43,34 @@ class ServiceViewModel with ChangeNotifier {
   }
 
   // Get all services for current user
-  Future<List<ServiceModel>> getServices() async {
-    _isLoading = true;
-    notifyListeners();
+Future<ServiceModel> getService() async {
+  _isLoading = true;
+  notifyListeners();
 
-    try {
-      final Response response =
-          await _apiService.getData('/services/get_service');
+  try {
+    final Response response =
+        await _apiService.getData('/services/get_service');
 
-      if (response.statusCode == 200) {
-        final List<dynamic> responseData = json.decode(response.data);
-        _services =
-            responseData.map((json) => ServiceModel.fromJson(json)).toList();
-        _isLoading = false;
-        notifyListeners();
-        return _services;
-      } else {
-        _isLoading = false;
-        notifyListeners();
-        throw Exception('Failed to load services: ${response.data['message']}');
-      }
-    } catch (e) {
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = response.data; // No need to decode
+      final service = ServiceModel.fromJson(responseData);
+      
       _isLoading = false;
       notifyListeners();
-      throw Exception('Error getting services: ${e.toString()}');
+      
+      return service;
+    } else {
+      _isLoading = false;
+      notifyListeners();
+      throw Exception('Failed to load service: ${response.data['message']}');
     }
+  } catch (e, s) {
+    _isLoading = false;
+    notifyListeners();
+    log('Error getting service: ${e.toString()}, $s');
+    throw Exception('Error getting service: ${e.toString()}, $s');
   }
+}
 
   // Get service by ID
   Future<ServiceModel> getServiceById(String serviceId) async {
@@ -87,12 +90,12 @@ class ServiceViewModel with ChangeNotifier {
       } else {
         _isLoading = false;
         notifyListeners();
-        throw Exception('Failed to load service: ${response.data['message']}');
+        throw Exception('Failed to find the service: ${response.statusCode}');
       }
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      throw Exception('Error getting service: ${e.toString()}');
+      throw Exception('Error getting service');
     }
   }
 
@@ -103,7 +106,7 @@ class ServiceViewModel with ChangeNotifier {
 
     try {
       final Response response = await _apiService.postData(
-          "/services/update_services",
+          "/services/update_service",
           data: json.encode(service.toJson()));
 
       _isLoading = false;
