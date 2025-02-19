@@ -1,4 +1,5 @@
 from datetime import datetime
+import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, or_
@@ -20,35 +21,41 @@ def create_business(
         if user.maxed_business:
             raise HTTPException(status_code=403, detail="Not authorized to create a business")
 
+        # ✅ Explicitly generate UUID before adding to DB
+        business_id = uuid.uuid4()
+
         # Create the business
         db_business = models.Business(
+            id=business_id,  # ✅ Explicitly set ID
             **business.model_dump(exclude={"services"}),
             owner_id=user.uid,
             created_at=datetime.now(),
             updated_at=datetime.now(),
         )
         db.add(db_business)
-        db.commit()
-        db.refresh(db_business)
-        user.maxed_business=True
-        # Create the services
+        db.commit()  # ✅ Ensure it's stored in DB
+        db.refresh(db_business)  # ✅ Ensure ID is assigned
+
+        user.maxed_business = True
+
+        # ✅ Now business_id is guaranteed to exist
         for service_data in business.services:
             db_service = models.Service(
                 **service_data.model_dump(),
                 owner_id=user.uid,
-                business_id=db_business.id,
+                business_id=business_id,  # ✅ Now it's guaranteed to be set
                 created_at=datetime.now(),
                 updated_at=datetime.now(),
             )
             db.add(db_service)
 
         db.commit()
-        db.refresh(db_business)
-        user.maxed_services=True
+        user.maxed_services = True
         return db_business
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail={ "message": "Failed to create business"})
+        db.rollback()
+        raise HTTPException(status_code=500, detail={"message": "Failed to create business"})
 
 # ✅ List Businesses (With Optional Search)
 @router.get("/list_businesses", response_model=List[schemas.Business])

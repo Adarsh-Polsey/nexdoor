@@ -44,7 +44,6 @@ void main() async {
         Provider<BusinessRepository>(
           create: (context) => BusinessRepository(),
         ),
-        // We'll create the BusinessDetailsViewModel in the screen itself
       ], 
       child: ToastificationWrapper(child: const MyApp())
     )

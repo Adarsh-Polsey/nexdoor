@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:nexdoor/common/core/theme/color_pallete.dart';
 import 'package:nexdoor/features/business/repositories/business_repository.dart';
+import 'package:nexdoor/features/business/view/view_detailed_business.dart';
 import 'package:nexdoor/features/business/view/widgets/custom_popup_menu.dart';
 import 'package:nexdoor/features/business/models/business_model.dart';
 
@@ -109,9 +110,7 @@ class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
                           mainAxisSpacing: 20,
                           mainAxisExtent: 260),
                       itemBuilder: (context, index) {
-                        return _postCard(_businesses[index], () {
-                          // Navigator.pushNamed();
-                        });
+                        return _postCard(_businesses[index]);
                       },
                       itemCount: _businesses.length,
                       shrinkWrap: true,
@@ -122,9 +121,11 @@ class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
               );
   }
 
-  Widget _postCard(BusinessModel business, void Function()? onTap) {
+  Widget _postCard(BusinessModel business) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: (){
+        Navigator.push(context,MaterialPageRoute(builder: (context) => BusinessDetailsScreen(business: business)));
+      },
       child: Container(
         decoration: BoxDecoration(
           boxShadow: [

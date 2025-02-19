@@ -17,9 +17,11 @@ class BusinessModel {
   final String businessType;
   final String location;
   final List<ServiceModel> services;
+  final List<String>? availableDays; // New field
+  final List<String>? availableHours; // New field
 
   BusinessModel({
-     this.id,
+    this.id,
     required this.name,
     required this.description,
     required this.category,
@@ -28,13 +30,15 @@ class BusinessModel {
     required this.email,
     required this.website,
     required this.allowsDelivery,
-     this.ownerId,
-     this.isActive,
-     this.createdAt,
-     this.updatedAt,
+    this.ownerId,
+    this.isActive,
+    this.createdAt,
+    this.updatedAt,
     required this.businessType,
     required this.location,
     required this.services,
+     this.availableDays, // Initialize new field
+     this.availableHours, // Initialize new field
   });
 
   factory BusinessModel.fromJson(Map<String, dynamic> json) {
@@ -62,6 +66,14 @@ class BusinessModel {
               ?.map((service) => ServiceModel.fromJson(service as Map<String, dynamic>))
               .toList() ??
           [],
+      availableDays: (json['available_days'] as List<dynamic>?)
+              ?.map((day) => day.toString())
+              .toList() ??
+          [], // Parse available_days
+      availableHours: (json['available_hours'] as List<dynamic>?)
+              ?.map((hour) => hour.toString())
+              .toList() ??
+          [], // Parse available_hours
     );
   }
 
@@ -83,6 +95,8 @@ class BusinessModel {
       'business_type': businessType,
       'location': location,
       'services': services.map((s) => s.toJson()).toList(),
+      'available_days': availableDays, // Include available_days in JSON
+      'available_hours': availableHours, // Include available_hours in JSON
     };
   }
 }

@@ -31,7 +31,7 @@ class User(Base):
 
 class Business(Base):
     __tablename__ = "businesses"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     owner_id = Column(String, ForeignKey("users.uid", ondelete="CASCADE"))
     name = Column(String, index=True, nullable=False)
     description = Column(Text, nullable=True)
@@ -65,9 +65,9 @@ class Service(Base):
     available_hours = Column(JSON, nullable=False, default=list)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    business = relationship("Business", back_populates="services")  # Change from joined
-    bookings = relationship("Booking", back_populates="service", lazy="select")  # Change from dynamic
-    owner = relationship("User", back_populates="services")  # Change from joined
+    business = relationship("Business", back_populates="services")  
+    bookings = relationship("Booking", back_populates="service", lazy="select")  
+    owner = relationship("User", back_populates="services")
 
 # ✅ Booking Model
 class Booking(Base):
