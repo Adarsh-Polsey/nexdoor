@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth, businesses, services, bookings, products, marketplace
+from routers import auth, businesses, services, bookings
 from database import engine
 import models
 
@@ -23,8 +23,7 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(businesses.router, prefix="/api/v1/businesses", tags=["Businesses"])
 app.include_router(services.router, prefix="/api/v1/services", tags=["Services"])
 app.include_router(bookings.router, prefix="/api/v1/bookings", tags=["Bookings"])
-app.include_router(products.router, prefix="/api/v1/products", tags=["Products"])
-app.include_router(marketplace.router, prefix="/api/v1/marketplace", tags=["Marketplace"])
+
 
 # ✅ Root API response
 @app.get("/")

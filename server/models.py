@@ -25,9 +25,8 @@ class User(Base):
     businesses = relationship("Business", back_populates="owner", lazy="select")  # Change from dynamic
     services = relationship("Service", back_populates="owner", lazy="select")  # Change from dynamic
     bookings = relationship("Booking", back_populates="user", lazy="select")  # Change from dynamic
-    # Default empty list for saved businesses and liked products
+    # Default empty list for saved businesses
     saved_businesses = Column(ARRAY(UUID(as_uuid=True)), default=[])
-    liked_products = Column(ARRAY(UUID(as_uuid=True)), default=[])
 
 class Business(Base):
     __tablename__ = "businesses"
@@ -49,7 +48,6 @@ class Business(Base):
     # Relationships
     owner = relationship("User", back_populates="businesses")  # Default is fine
     services = relationship("Service", back_populates="business", lazy="select")  # Change from dynamic
-    products = relationship("Product", back_populates="business", lazy="select")  # Change from dynamic
 
 class Service(Base):
     __tablename__ = "services"
@@ -84,35 +82,3 @@ class Booking(Base):
     # Relationships
     service = relationship("Service", back_populates="bookings", lazy="joined")
     user = relationship("User", back_populates="bookings", lazy="joined")
-
-# ✅ Product Model
-class Product(Base):
-    __tablename__ = "products"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    business_id = Column(UUID(as_uuid=True), ForeignKey("businesses.id", ondelete="CASCADE"))
-    name = Column(String, nullable=False)
-    description = Column(Text, nullable=True)
-    price = Column(Float, nullable=False)
-    stock = Column(Integer, default=0)
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-
-    # Relationships
-    business = relationship("Business", back_populates="products", lazy="joined")
-
-# ✅ MarketplaceItem Model
-class MarketplaceItem(Base):
-    __tablename__ = "marketplace_items"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    seller_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
-    title = Column(String, nullable=False)
-    description = Column(Text, nullable=True)
-    price = Column(Float, nullable=False)
-    condition = Column(Enum("new", "like_new", "good", "fair", "poor", name="item_condition"), nullable=False)
-    images = Column(ARRAY(String), default=[])
-    is_sold = Column(Boolean, default=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:nexdoor/common/core/theme/color_pallete.dart';
-import 'package:nexdoor/features/blog/view/discussion_screen.dart';
 import 'package:nexdoor/features/ai_chat/view/ai_chat_screen.dart';
 import 'package:nexdoor/features/business/view/view_businesses_screen.dart';
 import 'package:nexdoor/features/settings_profile/view/settings_screen.dart';
@@ -18,9 +17,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> activePage = [
     ViewBusinessScreen(),
-    ViewBusinessScreen(),
     ChatScreen(),
-    GroupScreen(),
     SettingsScreen(),
   ];
   int selectedIndex = 0;
@@ -42,19 +39,19 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           leadingWidth: 200,
           // Search Bar
-          title: Container(
-            width: 500,
-            height: 40,
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-            child: CustomTextField(
-              controller: TextEditingController(),
-              hinttext: "Search for anything...",
-              icon: Icon(
-                Icons.search,
-                color: Colors.black,
-              ),
-            ),
-          ),
+          // title: Container(
+          //   width: 500,
+          //   height: 40,
+          //   decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+          //   child: CustomTextField(
+          //     controller: TextEditingController(),
+          //     hinttext: "Search for anything...",
+          //     icon: Icon(
+          //       Icons.search,
+          //       color: Colors.black,
+          //     ),
+          //   ),
+          // ),
           centerTitle: true,
           backgroundColor: Colors.white,
           elevation: 2,

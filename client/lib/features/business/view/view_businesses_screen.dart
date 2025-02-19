@@ -158,9 +158,7 @@ class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
                   borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(12),
                       topRight: Radius.circular(12)),
-                  child: Image.network(
-                      fit: BoxFit.fitWidth,
-                      "https://images.unsplash.com/photo-1574158622682-e40e69881006"),
+                  child: Icon(Icons.business_outlined, size: 100),
                 ),
               ),
             ),
