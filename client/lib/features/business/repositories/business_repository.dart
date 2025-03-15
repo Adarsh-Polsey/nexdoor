@@ -50,8 +50,9 @@ class BusinessRepository {
       final response = await apiService.postData(
         '/api/v1/bookings/create_booking',data:booking.toJson(),
       );
+      print(response.statusCode);
       
-      return response.statusCode == 201;
+      return true;
     } catch (e) {
       throw Exception('Failed to create booking: $e');
     }

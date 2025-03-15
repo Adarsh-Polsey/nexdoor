@@ -98,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     child: ScaleTransition(
                       scale: _scaleAnimation,
                       child: const Text(
-                        'LocalEase',
+                        'NexDoor',
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:nexdoor/common/core/theme/color_pallete.dart';
 import 'package:nexdoor/features/business/repositories/business_repository.dart';
 import 'package:nexdoor/features/business/view/view_detailed_business.dart';
-import 'package:nexdoor/features/business/view/widgets/custom_popup_menu.dart';
 import 'package:nexdoor/features/business/models/business_model.dart';
 
 class ViewBusinessScreen extends StatefulWidget {
@@ -55,7 +54,7 @@ class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
       List<BusinessModel> businesses =
           await _repository.fetchBusinesses(search: _searchQuery);
       log("Fetched business");
-          log("Businesses : $businesses");
+      log("Businesses : $businesses");
       setState(() {
         _businesses = businesses;
         _isLoading = false;
@@ -81,40 +80,26 @@ class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
                       alignment: Alignment.centerLeft,
                       child: Row(
                         children: [
-                          CustomPopupMenu(
-                            onSelected: (value) {
-                              setState(() {
-                                selectedCategory = value;
-                              });
-                            },
-                            items: categories,
-                          ),
-                          SizedBox(width: 20),
-                          CustomPopupMenu(
-                            onSelected: (value) {
-                              setState(() {
-                                selectedBusinessType = value;
-                              });
-                            },
-                            items: businessTypes,
-                          ),
                         ],
                       ),
                     ),
                     SizedBox(height: 10),
                     // _reminderCard(),
-                    GridView.builder(
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 300,
-                          crossAxisSpacing: 20,
-                          mainAxisSpacing: 20,
-                          mainAxisExtent: 260),
-                      itemBuilder: (context, index) {
-                        return _postCard(_businesses[index]);
-                      },
-                      itemCount: _businesses.length,
-                      shrinkWrap: true,
-                      scrollDirection: Axis.vertical,
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.7, // Adjust the height as needed
+                      child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 300,
+                            crossAxisSpacing: 20,
+                            mainAxisSpacing: 20,
+                            mainAxisExtent: 260),
+                        itemBuilder: (context, index) {
+                          return _postCard(_businesses[index]);
+                        },
+                        itemCount: _businesses.length,
+                        shrinkWrap: true,
+                        scrollDirection: Axis.vertical,
+                      ),
                     ),
                   ],
                 ),
@@ -123,8 +108,11 @@ class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
 
   Widget _postCard(BusinessModel business) {
     return GestureDetector(
-      onTap: (){
-        Navigator.push(context,MaterialPageRoute(builder: (context) => BusinessDetailsScreen(business: business)));
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => BusinessDetailsScreen(business: business)));
       },
       child: Container(
         decoration: BoxDecoration(

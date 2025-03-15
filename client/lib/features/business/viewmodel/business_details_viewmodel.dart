@@ -19,26 +19,29 @@ class BusinessDetailsViewModel extends ChangeNotifier {
     if (business.services.isNotEmpty) {
       selectedServiceId = business.services[0].id;
       availableHours = List<String>.from(business.services[0].availableHours);
-      initializeHours(business.availableDays??[], availableHours); // Initialize hours
+      initializeHours(business.availableDays, availableHours);
       fetchUnavailableHours();
     }
   }
 
   // Initialize hours and group them by days
-  void initializeHours(List<String> days, List<String> hours) {
+  void initializeHours(List<String>? days, List<String> hours) {
     availableHours = hours;
-    groupHoursByDays(); // Group hours by days
+    if (days != null && days.isNotEmpty) {
+      groupHoursByDays();
+    }
     notifyListeners();
   }
 
   // Group available hours by days
   void groupHoursByDays() {
     groupedHours = {};
-    int hoursPerDay = availableHours.length ~/ business.availableDays!.length; // Assuming equal hours per day
-    for (int i = 0; i < business.availableDays!.length; i++) {
-      int startIndex = i * hoursPerDay;
-      int endIndex = startIndex + hoursPerDay;
-      groupedHours[business.availableDays![i]] = availableHours.sublist(startIndex, endIndex);
+    for (var hour in availableHours) {
+      var split = hour.split('-'); // Assuming format like 'Tuesday-09:00'
+      if (split.length == 2) {
+        String day = split[0];
+        groupedHours.putIfAbsent(day, () => []).add(split[1]); // Store only the time
+      }
     }
     notifyListeners();
   }
@@ -47,39 +50,34 @@ class BusinessDetailsViewModel extends ChangeNotifier {
   Future<void> fetchUnavailableHours() async {
     if (selectedServiceId == null) return;
 
+    isLoading = true;
+    notifyListeners();
+
     try {
-      isLoading = true;
-      notifyListeners();
-
       unavailableHours = await _repository.fetchUnavailableHours(selectedServiceId!);
-
-      isLoading = false;
       errorMessage = null;
-      notifyListeners();
     } catch (e) {
+      errorMessage = 'Could not fetch unavailable hours. Try again.';
+    } finally {
       isLoading = false;
-      errorMessage = 'Failed to fetch unavailable hours: $e';
       notifyListeners();
     }
   }
 
   // Select a service
-  void selectService(String serviceId) {
+  Future<void> selectService(String serviceId) async {
     final selectedService = business.services.firstWhere((service) => service.id == serviceId);
     selectedServiceId = serviceId;
     availableHours = List<String>.from(selectedService.availableHours);
-    selectedHour = null; // Reset selected hour
-    groupHoursByDays(); // Re-group hours by days
-    fetchUnavailableHours();
+    selectedHour = null;
+
+    groupHoursByDays();
+    await fetchUnavailableHours();
   }
 
   // Select a time slot (using a unique key like 'Tuesday-09:00')
   void selectHour(String? hour) {
-    if (selectedHour == hour) {
-      selectedHour = null; // Deselect if already selected
-    } else {
-      selectedHour = hour; // Select the new hour
-    }
+    selectedHour = (selectedHour == hour) ? null : hour;
     notifyListeners();
   }
 
@@ -91,39 +89,27 @@ class BusinessDetailsViewModel extends ChangeNotifier {
       return false;
     }
 
+    isLoading = true;
+    notifyListeners();
+
     try {
-      isLoading = true;
-      notifyListeners();
-
       final success = await _repository.createBooking(selectedServiceId!, selectedHour!);
-
-      isLoading = false;
-      if (success) {
-        errorMessage = null;
-      } else {
-        errorMessage = 'Failed to create booking';
-      }
-      notifyListeners();
+      errorMessage = success ? null : 'Failed to create booking';
       return success;
     } catch (e) {
-      isLoading = false;
       errorMessage = 'Error creating booking: $e';
-      notifyListeners();
       return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
   }
 
   // Get the selected service
   ServiceModel? get selectedService {
-    if (selectedServiceId == null) return null;
-
-    try {
-      return business.services.firstWhere(
-        (service) => service.id == selectedServiceId,
-      );
-    } catch (e) {
-      return null;
-    }
+    return business.services.firstWhere(
+      (service) => service.id == selectedServiceId,
+    );
   }
 
   // Get available hours for a specific day
