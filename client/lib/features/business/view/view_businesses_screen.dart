@@ -1,11 +1,99 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:nexdoor/common/core/theme/color_pallete.dart';
 import 'package:nexdoor/features/business/repositories/business_repository.dart';
 import 'package:nexdoor/features/business/view/view_detailed_business.dart';
 import 'package:nexdoor/features/business/models/business_model.dart';
 
+class BusinessListViewModel extends ChangeNotifier {
+  final BusinessRepository _repository;
+  
+  List<BusinessModel> _businesses = [];
+  List<BusinessModel> _filteredBusinesses = [];
+  bool _isLoading = true;
+  String _searchQuery = '';
+  String _selectedCategory = "All categories";
+  String _selectedBusinessType = "Any";
+
+  BusinessListViewModel(this._repository);
+
+  // Getters
+  List<BusinessModel> get businesses => _filteredBusinesses;
+  bool get isLoading => _isLoading;
+  String get selectedCategory => _selectedCategory;
+  String get selectedBusinessType => _selectedBusinessType;
+  String get searchQuery => _searchQuery;
+
+  Future<void> fetchBusinesses({
+    String? search, 
+    String? category, 
+    String? businessType
+  }) async {
+    try {
+      _isLoading = true;
+      _searchQuery = search ?? _searchQuery;
+      _selectedCategory = category ?? _selectedCategory;
+      _selectedBusinessType = businessType ?? _selectedBusinessType;
+      notifyListeners();
+
+      // Fetch all businesses
+      _businesses = await _repository.fetchBusinesses(search: _searchQuery);
+      
+      // Apply filters
+      _applyFilters();
+
+      _isLoading = false;
+    } catch (e) {
+      log("Error fetching businesses: $e");
+      _isLoading = false;
+      _businesses = [];
+      _filteredBusinesses = [];
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  void _applyFilters() {
+    _filteredBusinesses = _businesses.where((business) {
+      // Category filter
+      bool matchesCategory = _selectedCategory == "All categories" || 
+                              business.category == _selectedCategory;
+      
+      // Business type filter
+      bool matchesBusinessType = _selectedBusinessType == "Any" || 
+                                  business.businessType == _selectedBusinessType;
+      
+      // Search filter
+      bool matchesSearch = _searchQuery.isEmpty || 
+                            business.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                            business.category.toLowerCase().contains(_searchQuery.toLowerCase());
+      
+      return matchesCategory && matchesBusinessType && matchesSearch;
+    }).toList();
+
+    notifyListeners();
+  }
+
+  void updateFilters({
+    String? category, 
+    String? businessType, 
+    String? search
+  }) {
+    if (category != null) _selectedCategory = category;
+    if (businessType != null) _selectedBusinessType = businessType;
+    if (search != null) _searchQuery = search;
+
+    _applyFilters();
+  }
+
+  void clearFilters() {
+    _searchQuery = '';
+    _selectedCategory = "All categories";
+    _selectedBusinessType = "Any";
+    _applyFilters();
+  }
+}
 class ViewBusinessScreen extends StatefulWidget {
   const ViewBusinessScreen({super.key});
 
@@ -14,11 +102,8 @@ class ViewBusinessScreen extends StatefulWidget {
 }
 
 class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
-  String selectedCategory = "All categories";
-  final BusinessRepository _repository = BusinessRepository();
-  List<BusinessModel> _businesses = [];
-  bool _isLoading = true;
-  String? _searchQuery;
+  final TextEditingController _searchController = TextEditingController();
+
   final List<String> categories = [
     "All categories",
     "Appliances",
@@ -33,8 +118,6 @@ class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
     "Home decor",
   ];
 
-  String selectedBusinessType = "Any";
-
   final List<String> businessTypes = [
     "Any",
     "Online",
@@ -45,88 +128,203 @@ class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchBusinesses();
-  }
-
-  Future<void> _fetchBusinesses() async {
-    try {
-      log("Fetching business");
-      List<BusinessModel> businesses =
-          await _repository.fetchBusinesses(search: _searchQuery);
-      log("Fetched business");
-      log("Businesses : $businesses");
-      setState(() {
-        _businesses = businesses;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<BusinessListViewModel>(context, listen: false).fetchBusinesses();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return _isLoading
-        ? const Center(child: CircularProgressIndicator())
-        : _businesses.isEmpty
-            ? const Center(child: Text("No businesses found"))
-            : SingleChildScrollView(
-                padding: EdgeInsets.all(30),
-                child: Column(
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Row(
-                        children: [
-                        ],
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Search and Filter Section
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  // Search TextField
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search businesses...',
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: Consumer<BusinessListViewModel>(
+                          builder: (context, viewModel, child) {
+                            return viewModel.searchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    viewModel.updateFilters(search: '');
+                                  },
+                                )
+                              : SizedBox.shrink();
+                          },
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
+                      onChanged: (value) {
+                        Provider.of<BusinessListViewModel>(context, listen: false)
+                            .updateFilters(search: value);
+                      },
                     ),
-                    SizedBox(height: 10),
-                    // _reminderCard(),
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.7, // Adjust the height as needed
-                      child: GridView.builder(
-                        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 300,
-                            crossAxisSpacing: 20,
-                            mainAxisSpacing: 20,
-                            mainAxisExtent: 260),
-                        itemBuilder: (context, index) {
-                          return _postCard(_businesses[index]);
-                        },
-                        itemCount: _businesses.length,
-                        shrinkWrap: true,
-                        scrollDirection: Axis.vertical,
-                      ),
+                  ),
+                  
+                  // Clear Filters Button
+                  Consumer<BusinessListViewModel>(
+                    builder: (context, viewModel, child) {
+                      return (viewModel.selectedCategory != "All categories" ||
+                             viewModel.selectedBusinessType != "Any" ||
+                             viewModel.searchQuery.isNotEmpty)
+                        ? IconButton(
+                            icon: const Icon(Icons.filter_alt_off),
+                            onPressed: () {
+                              _searchController.clear();
+                              viewModel.clearFilters();
+                            },
+                          )
+                        : const SizedBox.shrink();
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            // Filters Row
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    // Category Dropdown
+                    _buildDropdownFilter(
+                      items: categories,
+                      value: context.watch<BusinessListViewModel>().selectedCategory,
+                      hint: 'Category',
+                      onChanged: (value) {
+                        Provider.of<BusinessListViewModel>(context, listen: false)
+                            .updateFilters(category: value);
+                      },
+                    ),
+                    const SizedBox(width: 10),
+                    // Business Type Dropdown
+                    _buildDropdownFilter(
+                      items: businessTypes,
+                      value: context.watch<BusinessListViewModel>().selectedBusinessType,
+                      hint: 'Business Type',
+                      onChanged: (value) {
+                        Provider.of<BusinessListViewModel>(context, listen: false)
+                            .updateFilters(businessType: value);
+                      },
                     ),
                   ],
                 ),
-              );
+              ),
+            ),
+
+            // Business List
+            Expanded(
+              child: Consumer<BusinessListViewModel>(
+                builder: (context, viewModel, child) {
+                  if (viewModel.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (viewModel.businesses.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('No businesses found'),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => viewModel.clearFilters(),
+                            child: const Text('Clear Filters'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return _buildBusinessGrid(viewModel);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
-  Widget _postCard(BusinessModel business) {
+  Widget _buildDropdownFilter({
+    required List<String> items,
+    required String? value,
+    required String hint,
+    required Function(String?) onChanged,
+  }) {
+    return DropdownButton<String>(
+      value: value,
+      hint: Text(hint),
+      underline: Container(), // Remove underline
+      style: TextStyle(
+        color: Theme.of(context).textTheme.bodyLarge?.color,
+        fontSize: 14,
+      ),
+      items: items.map((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(
+            value,
+            style: const TextStyle(overflow: TextOverflow.ellipsis),
+          ),
+        );
+      }).toList(),
+      onChanged: onChanged,
+    );
+  }
+
+  Widget _buildBusinessGrid(BusinessListViewModel viewModel) {
+    return GridView.builder(
+      padding: const EdgeInsets.all(10),
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 300,
+        crossAxisSpacing: 20,
+        mainAxisSpacing: 20,
+        mainAxisExtent: 260,
+      ),
+      itemBuilder: (context, index) {
+        return _buildBusinessCard(viewModel.businesses[index]);
+      },
+      itemCount: viewModel.businesses.length,
+    );
+  }
+
+  Widget _buildBusinessCard(BusinessModel business) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => BusinessDetailsScreen(business: business)));
+          context,
+          MaterialPageRoute(
+            builder: (context) => BusinessDetailsScreen(business: business)
+          )
+        );
       },
       child: Container(
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-                blurRadius: 4,
-                color: Colors.grey.shade300,
-                spreadRadius: 2,
-                offset: Offset(0, 2)),
-            BoxShadow(
-                blurRadius: 4,
-                color: Colors.grey.shade300,
-                spreadRadius: 2,
-                offset: Offset(0, -2)),
+              blurRadius: 4,
+              color: Colors.grey.shade300,
+              spreadRadius: 2,
+              offset: const Offset(0, 2)
+            ),
           ],
           color: ColorPalette.backgroundColor,
           borderRadius: BorderRadius.circular(12),
@@ -135,48 +333,65 @@ class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
+              height: 175,
+              width: double.infinity,
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      topRight: Radius.circular(12))),
-              child: SizedBox(
-                height: 175,
-                width: double.infinity,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      topRight: Radius.circular(12)),
-                  child: Icon(Icons.business_outlined, size: 100),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12)
                 ),
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
+              ),
+              child: const Center(
+                child: Icon(Icons.business_outlined, size: 100),
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-              child: Text(business.name,
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(
+                business.name,
+                style: const TextStyle(fontWeight: FontWeight.bold)
+              ),
             ),
             Container(
-              padding: EdgeInsets.symmetric(vertical: 3, horizontal: 5),
-              margin: EdgeInsets.all(3),
+              padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 5),
+              margin: const EdgeInsets.all(3),
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(9),
-                  color:
-                      ColorPalette.primaryButtonSplash.withValues(alpha: 0.2)),
+                borderRadius: BorderRadius.circular(9),
+                color: ColorPalette.primaryButtonSplash.withValues(alpha: 0.2)
+              ),
               child: Text(
                 business.category,
-                style: TextStyle(fontSize: 12),
+                style: const TextStyle(fontSize: 12),
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-              child: Text("📍${business.location}",
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(
+                "📍${business.location}",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.bold)
+              ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+// Provider Setup
+class BusinessListProvider extends StatelessWidget {
+  final Widget child;
+
+  const BusinessListProvider({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => BusinessListViewModel(BusinessRepository()),
+      child: child,
     );
   }
 }

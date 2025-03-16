@@ -43,6 +43,12 @@ void main() async {
         Provider<BusinessRepository>(
           create: (context) => BusinessRepository(),
         ),
+        // Add BusinessListViewModel provider
+        ChangeNotifierProvider(
+          create: (context) => BusinessListViewModel(
+            context.read<BusinessRepository>()
+          ),
+        ),
       ], 
       child: ToastificationWrapper(child: const MyApp())
     )
@@ -69,7 +75,10 @@ class MyApp extends StatelessWidget {
         '/settings': (context) => SettingsScreen(),
         '/ai_chat_screen': (context) => ChatScreen(),
         '/blog': (context) => GroupScreen(),
-        '/view_businesses': (context) => ViewBusinessScreen(),
+        // Wrap ViewBusinessScreen with BusinessListProvider
+        '/view_businesses': (context) => const BusinessListProvider(
+          child: ViewBusinessScreen(),
+        ),
         // More - Settings screens
         '/manage_business': (context) => ManageBusinessScreen(),
         '/manage_services': (context) => ManageServiceScreen(),
