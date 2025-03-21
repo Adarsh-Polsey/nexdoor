@@ -1,4 +1,5 @@
 from datetime import datetime
+import traceback
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
@@ -115,25 +116,41 @@ def update_business(
     user: models.User = Depends(get_current_user)
 ):
     try:
+        # Fetch the business owned by the current user
         db_business = db.query(models.Business).filter(models.Business.owner_id == user.uid).first()
 
         if not db_business:
-            raise HTTPException(status_code=404, detail="Business not found")
+            raise HTTPException(
+                status_code=404, 
+                detail=f"Business not found - user.uid: {user.uid}, owner_id: {business_update.owner_id}"
+            )
 
+        # Authorization check
         if db_business.owner_id != user.uid:
             raise HTTPException(status_code=403, detail="Not authorized to update this business")
 
-        for key, value in business_update.model_dump().items():
-            setattr(db_business, key, value)
+        # Update fields dynamically
+        business_data=business_update.model_dump(exclude_unset=True)
+        for key, value in business_data.items():
+            if hasattr(db_business, key):
+                setattr(db_business, key, value)
 
         db.commit()
         db.refresh(db_business)
         return db_business
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail={ "message": "Failed to update business"})
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": "Failed to update business",
+                "error":f"{e}",
+                "trace": traceback.format_exc()
+            }
+        )
 
 # ✅ Delete Business (Only Owner Can Delete)
-@router.delete("/delete_business/{business_id}", status_code=204)
+@router.post("/delete_business/{business_id}", status_code=204)
 def delete_business(
     business_id: str,
     db: Session = Depends(get_db),

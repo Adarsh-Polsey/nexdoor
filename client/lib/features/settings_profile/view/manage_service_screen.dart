@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nexdoor/features/business/models/services_model.dart';
-import 'package:nexdoor/features/settings_profile/viewmodel/services_viewmodel.dart';
+import 'package:nexdoor/features/settings_profile/viewmodel/service_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 class ManageServiceScreen extends StatefulWidget {
@@ -59,9 +59,15 @@ class _ManageServiceScreenState extends State<ManageServiceScreen> {
         Provider.of<ServiceViewModel>(context, listen: false);
 
     try {
-      ServiceModel service;
-      service = await serviceViewModel.getService();
+      ServiceModel? service;
+      service = await serviceViewModel.getUserService();
+      if(service!=null){
       _populateFormFields(service);
+      }
+      else{
+        _isLoading = false;
+        throw Exception("Service not found");
+      }
       setState(() {
         _currentService = service;
         _isLoading = false;

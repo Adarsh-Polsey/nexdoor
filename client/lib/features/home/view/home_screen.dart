@@ -5,7 +5,6 @@ import 'package:nexdoor/common/core/theme/color_pallete.dart';
 import 'package:nexdoor/features/ai_chat/view/chat_screen.dart';
 import 'package:nexdoor/features/business/view/view_businesses_screen.dart';
 import 'package:nexdoor/features/settings_profile/view/settings_screen.dart';
-import 'package:nexdoor/widgets/c_textfield_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -38,21 +37,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           leadingWidth: 200,
-          // Search Bar
-          title: Container(
-            width: 500,
-            height: 40,
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-            child: CustomTextField(
-              controller: TextEditingController(),
-              hinttext: "Search for anything...",
-              icon: Icon(
-                Icons.search,
-                color: Colors.black,
-              ),
-            ),
-          ),
-          centerTitle: true,
           backgroundColor: Colors.white,
           elevation: 2,
           // Profile and notifications

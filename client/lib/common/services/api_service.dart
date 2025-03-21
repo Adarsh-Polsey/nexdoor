@@ -30,8 +30,44 @@ class ApiService {
   // 🔹 POST Request: Handles errors properly
   Future<dynamic> postData(String endpoint, {Object? data}) async {
     try {
-      final Response<dynamic> response = await _dio.post(endpoint, data: data);
+      final response = await _dio.post(endpoint, data: data);
+      print(response.runtimeType);
       return response;
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    } on Exception {
+      rethrow;
+    }
+  }
+
+   Future<Response> putData(
+    String path, {
+    required Map<String, dynamic> data,
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    try {
+      return await _dio.put(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+      );
+    } on DioException catch (e) {
+      return _handleDioError(e);
+    } on Exception {
+      rethrow;
+    }
+  }
+
+  // DELETE request
+  Future<Response> deleteData(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    try {
+      return await _dio.delete(
+        path,
+        queryParameters: queryParameters,
+      );
     } on DioException catch (e) {
       return _handleDioError(e);
     } on Exception {

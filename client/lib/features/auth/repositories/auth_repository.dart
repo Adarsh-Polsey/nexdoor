@@ -41,7 +41,7 @@ class AuthRepository {
         "phone_number": user.phoneNumber,
         "location": user.location
       });
-      log("Data: " + data.toString());
+      log("Data: $data");
       final Response<dynamic> response = await Dio().post(
         "http://127.0.0.1:8000/api/v1/auth/signup",
         data: data,

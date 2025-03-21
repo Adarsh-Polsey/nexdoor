@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:nexdoor/common/core/theme/color_pallete.dart';
 import 'package:nexdoor/features/auth/repositories/auth_repository.dart';
-import 'package:nexdoor/features/settings_profile/viewmodel/profile_viewmodel.dart';
+import 'package:nexdoor/features/settings_profile/viewmodel/user_view_model.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -18,7 +18,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     Future.microtask(() =>
-        Provider.of<ProfileViewModel>(context, listen: false).fetchUserData());
+        Provider.of<UserViewModel>(context, listen: false).fetchUserData());
   }
 
   @override
@@ -26,7 +26,7 @@ Widget build(BuildContext context) {
   return Scaffold(
     body: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 200.0),
-      child: Consumer<ProfileViewModel>(
+      child: Consumer<UserViewModel>(
         builder: (context, userViewModel, child) {
           if (userViewModel.isLoading) {
             return const Center(child: CircularProgressIndicator());

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nexdoor/features/business/models/business_model.dart';
 import 'package:nexdoor/features/business/models/services_model.dart';
-import 'package:nexdoor/features/settings_profile/viewmodel/profile_viewmodel.dart';
+import 'package:nexdoor/features/settings_profile/viewmodel/business_view_model.dart';
 import 'package:provider/provider.dart';
 
 class CreateBusinessWithServiceScreen extends StatefulWidget {
@@ -49,16 +49,15 @@ class _CreateBusinessWithServiceScreenState extends State<CreateBusinessWithServ
   final List<String> _businessTypes = ['Physical', 'Online', 'Hybrid'];
 
   final List<String> _categories = [
-    'Food & Beverage',
-    'Health & Beauty',
-    'Home Services',
-    'Professional Services',
-    'Retail & Shopping',
-    'Auto Services',
-    'Education & Training',
-    'Entertainment',
-    'Pet Services',
-    'Other'
+  "Health & Beauty",
+  "Home Services",
+  "Automotive",
+  "Baby & Kids",
+  "Bicycles & Repair",
+  "Education & Coaching",
+  "Events & Entertainment",
+  "Professional Services",
+  "Medical & Wellness"
   ];
 
   final List<String> _locations = [
@@ -85,7 +84,7 @@ class _CreateBusinessWithServiceScreenState extends State<CreateBusinessWithServ
 
   @override
   Widget build(BuildContext context) {
-    final businessViewModel = Provider.of<ProfileViewModel>(context);
+    final businessViewModel = Provider.of<BusinessViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -488,7 +487,7 @@ class _CreateBusinessWithServiceScreenState extends State<CreateBusinessWithServ
     final parts = timeString.split(':');
     return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
   }
-Future<void> _submitForm(ProfileViewModel businessViewModel) async {
+Future<void> _submitForm(BusinessViewModel businessViewModel) async {
   if (_formKey.currentState!.validate() &&
       _selectedBusinessType != null &&
       _selectedCategory != null &&
@@ -539,7 +538,7 @@ Future<void> _submitForm(ProfileViewModel businessViewModel) async {
       );
 
       // Submit everything in one go
-      final response = await businessViewModel.createBusinessWithServices(business);
+      final response = await businessViewModel.createBusiness(business);
 
       if (response == true && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

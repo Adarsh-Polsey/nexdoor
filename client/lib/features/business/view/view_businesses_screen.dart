@@ -13,7 +13,7 @@ class BusinessListViewModel extends ChangeNotifier {
   List<BusinessModel> _filteredBusinesses = [];
   bool _isLoading = true;
   String _searchQuery = '';
-  String _selectedCategory = "All categories";
+  String _selectedCategory = "All Categories";
   String _selectedBusinessType = "Any";
 
   BusinessListViewModel(this._repository);
@@ -57,7 +57,7 @@ class BusinessListViewModel extends ChangeNotifier {
   void _applyFilters() {
     _filteredBusinesses = _businesses.where((business) {
       // Category filter
-      bool matchesCategory = _selectedCategory == "All categories" || 
+      bool matchesCategory = _selectedCategory == "All Categories" || 
                               business.category == _selectedCategory;
       
       // Business type filter
@@ -89,7 +89,7 @@ class BusinessListViewModel extends ChangeNotifier {
 
   void clearFilters() {
     _searchQuery = '';
-    _selectedCategory = "All categories";
+    _selectedCategory = "All Categories";
     _selectedBusinessType = "Any";
     _applyFilters();
   }
@@ -104,19 +104,18 @@ class ViewBusinessScreen extends StatefulWidget {
 class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
   final TextEditingController _searchController = TextEditingController();
 
-  final List<String> categories = [
-    "All categories",
-    "Appliances",
-    "Automotive",
-    "Baby & kids",
-    "Bicycles",
-    "Clothing & accessories",
-    "Electronics",
-    "Furniture",
-    "Garage sales",
-    "Garden",
-    "Home decor",
-  ];
+ final List<String> categories = [
+  "All Categories",
+  "Health & Beauty",
+  "Home Services",
+  "Automotive",
+  "Baby & Kids",
+  "Bicycles & Repair",
+  "Education & Coaching",
+  "Events & Entertainment",
+  "Professional Services",
+  "Medical & Wellness"
+];
 
   final List<String> businessTypes = [
     "Any",
@@ -179,7 +178,7 @@ class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
                   // Clear Filters Button
                   Consumer<BusinessListViewModel>(
                     builder: (context, viewModel, child) {
-                      return (viewModel.selectedCategory != "All categories" ||
+                      return (viewModel.selectedCategory != "All Categories" ||
                              viewModel.selectedBusinessType != "Any" ||
                              viewModel.searchQuery.isNotEmpty)
                         ? IconButton(

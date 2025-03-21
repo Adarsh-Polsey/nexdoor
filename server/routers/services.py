@@ -89,11 +89,11 @@ def get_service(
             raise HTTPException(status_code=404, detail="No services found for the current user")
 
         return services 
-    except Exception as e: 
+    except Exception as e:
         raise HTTPException(status_code=500, detail={ "message": "Failed to get service"})
 
 # ✅ Update Service (Only Business Owners)
-@router.post("/update_service", response_model=schemas.Service)
+@router.put("/update_service", response_model=schemas.Service)
 def update_service(
     service_update: schemas.ServiceCreate,
     db: Session = Depends(get_db),
@@ -103,7 +103,7 @@ def update_service(
         db_service = db.query(models.Service).filter(models.Service.owner_id == user.uid).first()
 
         if not db_service:
-            raise HTTPException(status_code=404, detail="Service not found")
+            raise HTTPException(status_code=404, detail=f" Service not found - user.uid: {user.uid} owner_id: {business_update.owner_id}")
 
         for key, value in service_update.model_dump().items():
             setattr(db_service, key, value)
