@@ -1,305 +1,180 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:nexdoor/features/business/models/booking_model.dart';
 import 'package:nexdoor/features/business/models/business_model.dart';
 import 'package:nexdoor/features/business/models/services_model.dart';
 import 'package:nexdoor/features/business/repositories/business_repository.dart';
 
-class BusinessDetailsViewModel extends ChangeNotifier {
-  final BusinessRepository _repository;
-  final BusinessModel business;
+class BusinessDetailViewModel extends ChangeNotifier {
+  final BusinessRepository _businessRepository;
+  final BookingRepository _bookingRepository;
 
-  // State variables
-  String? _selectedServiceId;
-  String? _selectedHour;
-  List<String> _availableHours = [];
-  List<String> _unavailableHours = [];
-  Map<String, List<String>> _groupedHours = {};
-
-  // Booking state
+  BusinessModel? _business;
+  ServicesModel? _selectedService;
+  DateTime _selectedDate = DateTime.now();
+  List<TimeSlot> _availableTimeSlots = [];
+  String? _selectedTimeSlot;
   bool _isLoading = false;
   String? _errorMessage;
-  DateTime? _selectedDate;
-  List<DateTime> _availableDates = [];
+  bool _bookingSuccess = false;
 
-  // Getters
-  String? get selectedServiceId => _selectedServiceId;
-  String? get selectedHour => _selectedHour;
-  List<String> get availableHours => _availableHours;
-  List<String> get unavailableHours => _unavailableHours;
-  Map<String, List<String>> get groupedHours => _groupedHours;
+  BusinessDetailViewModel({
+    required BusinessRepository businessRepository,
+    required BookingRepository bookingRepository,
+  })  : _businessRepository = businessRepository,
+        _bookingRepository = bookingRepository;
+
+  // Getter methods
+  BusinessModel? get business => _business;
+  ServicesModel? get selectedService => _selectedService;
+  DateTime get selectedDate => _selectedDate;
+  List<TimeSlot> get availableTimeSlots => _availableTimeSlots;
+  String? get selectedTimeSlot => _selectedTimeSlot;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  DateTime? get selectedDate => _selectedDate;
-  List<DateTime> get availableDates => _availableDates;
+  bool get bookingSuccess => _bookingSuccess;
 
-  BusinessDetailsViewModel(this._repository, this.business) {
-    _initializeViewModel();
+  // For Provider dependency updates if needed
+  void updateRepositories(BusinessRepository businessRepo, BookingRepository bookingRepo) {
+    // This method allows the Provider to update the repositories if they change
   }
 
-  Future<void> fetchAvailableTimeSlots() async {
-    if (_selectedServiceId == null) {
-      _errorMessage = 'No service selected';
-      notifyListeners();
-      return;
-    }
-
+  Future<void> loadBusinessDetails() async {
+    _setLoading(true);
     try {
-      _isLoading = true;
+      _business = await _businessRepository.getBusinessDetails();
       notifyListeners();
-
-      // Fetch available hours for the selected service
-      _availableHours =
-          await _repository.fetchAvailableHours(_selectedServiceId!);
-
-      // Group hours by days
-      _groupHoursByDays();
-
-      // Fetch unavailable hours
-      await _fetchUnavailableHours();
-
-      // Fetch available dates
-      await _fetchAvailableDates();
-
-      _errorMessage = null;
     } catch (e) {
-      _errorMessage = 'Failed to fetch available time slots: ${e.toString()}';
+      _setError('Failed to load business details: $e');
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      _setLoading(false);
     }
   }
 
-  Future<void> _fetchAvailableDates() async {
-    try {
-      _availableDates =
-          await _repository.fetchAvailableDates(_selectedServiceId!);
-    } catch (e) {
-      _errorMessage = 'Failed to fetch available dates';
-      _availableDates = _generateDefaultAvailableDates();
-    }
-    notifyListeners();
-  }
-
-  List<DateTime> _generateDefaultAvailableDates() {
-    final now = DateTime.now();
-    return List.generate(30, (index) => now.add(Duration(days: index)))
-        .where((date) {
-      // Exclude weekends or add any other filtering logic
-      return date.weekday != DateTime.saturday &&
-          date.weekday != DateTime.sunday;
-    }).toList();
-  }
-
-  void _initializeViewModel() {
-    if (business.services.isNotEmpty) {
-      _selectedServiceId = business.services.first.id;
-      _availableHours =
-          List<String>.from(business.services.first.availableHours);
-      _initializeHours(business.availableDays, _availableHours);
-      fetchAvailableTimeSlots();
-    }
-  }
-
-  void _initializeHours(List<String>? days, List<String> hours) {
-    _availableHours = hours;
-    if (days != null && days.isNotEmpty) {
-      _groupHoursByDays();
-    }
-    notifyListeners();
-  }
-
-  void _groupHoursByDays() {
-    _groupedHours = {};
-    for (var hour in _availableHours) {
-      var split = hour.split('-');
-      if (split.length == 2) {
-        String day = split[0];
-        _groupedHours.putIfAbsent(day, () => []).add(split[1]);
-      }
-    }
-    notifyListeners();
-  }
-
-  Future<void> _fetchUnavailableHours() async {
-    if (_selectedServiceId == null) return;
-
-    try {
-      _unavailableHours =
-          await _repository.fetchUnavailableHours(_selectedServiceId!);
-      _errorMessage = null;
-    } catch (e) {
-      _errorMessage = 'Could not fetch unavailable hours. Try again.';
-    }
-    notifyListeners();
-  }
-
-  Future<void> selectService(String serviceId) async {
-    final selectedService =
-        business.services.firstWhere((service) => service.id == serviceId);
-    _selectedServiceId = serviceId;
-    _availableHours = List<String>.from(selectedService.availableHours);
-    _selectedHour = null;
-    _selectedDate = null;
-
-    _groupHoursByDays();
-    await fetchAvailableTimeSlots();
-  }
-
-  void selectHour(String? hour) {
-    _selectedHour = (_selectedHour == hour) ? null : hour;
+  void selectService(ServicesModel service) {
+    _selectedService = service;
+    _selectedTimeSlot = null;
+    generateAvailableTimeSlots();
     notifyListeners();
   }
 
   void selectDate(DateTime date) {
     _selectedDate = date;
+    _selectedTimeSlot = null;
+    generateAvailableTimeSlots();
     notifyListeners();
   }
 
-  Future<bool> bookService() async {
-    // Comprehensive validation
-    if (!_validateBooking()) return false;
-
-    _isLoading = true;
+  void selectTimeSlot(String timeSlot) {
+    _selectedTimeSlot = timeSlot;
     notifyListeners();
+  }
 
+  String getDayOfWeek(DateTime date) {
+    final days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    // DateTime.weekday returns 1 for Monday, 2 for Tuesday, etc.
+    return days[date.weekday - 1];
+  }
+
+  Future<void> generateAvailableTimeSlots() async {
+    if (_selectedService == null) return;
+
+    _availableTimeSlots = [];
+    
+    // Check if service is available on selected day
+    final dayOfWeek = getDayOfWeek(_selectedDate);
+    if (!_selectedService!.availableDays.contains(dayOfWeek)) {
+      _setError('Service not available on $dayOfWeek');
+      return;
+    }
+
+    // Get existing bookings for this day to check availability
     try {
-      final bookingDetails = {
-        'serviceId': _selectedServiceId,
-        'hour': _selectedHour,
-        'date': _selectedDate,
-      };
+      final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
+      final bookings = await _bookingRepository.getBusinessBookings(
+        _selectedService!.businessId??"",
+        dateStr,
+      );
 
-      final success = await _repository.createBooking(bookingDetails);
-
-      if (success) {
-        _resetBookingState();
-      } else {
-        _errorMessage = 'Booking failed. Please try again.';
+      final bookedSlots = <String>{};
+      for (var booking in bookings) {
+        if (booking.serviceId == _selectedService!.id) {
+          bookedSlots.add(booking.startTime);
+        }
       }
 
-      return success;
-    } catch (e) {
-      _errorMessage = 'Error creating booking: ${e.toString()}';
-      return false;
-    } finally {
-      _isLoading = false;
+      // Generate time slots based on service's available hours
+      for (var time in _selectedService!.availableHours) {
+        final isAvailable = !bookedSlots.contains(time);
+        _availableTimeSlots.add(TimeSlot(time: time, isAvailable: isAvailable));
+      }
+
       notifyListeners();
+    } catch (e,s) {
+      _setError('Failed to load time slots: $e $s');
     }
   }
 
-  bool _validateBooking() {
-    if (_selectedServiceId == null) {
-      _errorMessage = 'Please select a service';
-      notifyListeners();
-      return false;
+  Future<void> createBooking() async {
+    if (_selectedService == null || _selectedTimeSlot == null) {
+      _setError('Please select a service and time slot');
+      return;
     }
 
-    if (_selectedHour == null) {
-      _errorMessage = 'Please select an available hour';
-      notifyListeners();
-      return false;
-    }
-
-    if (_selectedDate == null) {
-      _errorMessage = 'Please select a date';
-      notifyListeners();
-      return false;
-    }
-
-    return true;
-  }
-
-  void _resetBookingState() {
-    _selectedServiceId = null;
-    _selectedHour = null;
-    _selectedDate = null;
-    _errorMessage = null;
-    _availableHours.clear();
-    _unavailableHours.clear();
-    _groupedHours.clear();
-  }
-
-  ServiceModel? get selectedService {
+    _setLoading(true);
+    _bookingSuccess = false;
+    
     try {
-      return business.services.firstWhere(
-        (service) => service.id == _selectedServiceId,
+      // Calculate end time based on service duration
+      final startTime = _selectedTimeSlot!;
+      final startHour = int.parse(startTime.split(':')[0]);
+      final startMinute = int.parse(startTime.split(':')[1]);
+      
+      final endDateTime = DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+        startHour,
+        startMinute,
+      ).add(Duration(minutes: _selectedService!.duration));
+      
+      final endTime = '${endDateTime.hour.toString().padLeft(2, '0')}:${endDateTime.minute.toString().padLeft(2, '0')}';
+      
+      final booking = BookingModel(
+        serviceId: _selectedService!.id,
+        businessId: _selectedService!.businessId,
+        bookingDate: DateFormat('yyyy-MM-dd').format(_selectedDate),
+        startTime: startTime,
+        endTime: endTime,
+        status: 'pending',
       );
+
+      await _bookingRepository.createBooking(booking);
+      _bookingSuccess = true;
+      notifyListeners();
     } catch (e) {
-      return null;
+      _setError('Failed to create booking: $e');
+    } finally {
+      _setLoading(false);
     }
   }
 
-  List<String> getAvailableHoursForDay(String day) {
-    return _groupedHours[day] ?? [];
-  }
-
-  bool isHourUnavailable(String hour) {
-    return _unavailableHours.contains(hour);
-  }
-
-  bool get isBookingValid {
-    return _selectedServiceId != null &&
-        _selectedHour != null &&
-        _selectedDate != null;
-  }
-
-  void resetBooking() {
-    // Reset all booking-related state variables
-    _selectedServiceId = null;
-    _selectedHour = null;
-    _selectedDate = null;
+  void resetBookingState() {
+    _bookingSuccess = false;
     _errorMessage = null;
+    notifyListeners();
+  }
 
-    // Clear available and unavailable hours
-    _availableHours.clear();
-    _unavailableHours.clear();
-    _groupedHours.clear();
-    _availableDates.clear();
-
-    // If there are services, reinitialize with the first service
-    if (business.services.isNotEmpty) {
-      _selectedServiceId = business.services.first.id;
-      _availableHours =
-          List<String>.from(business.services.first.availableHours);
-      _initializeHours(business.availableDays, _availableHours);
-
-      // Fetch new time slots
-      fetchAvailableTimeSlots();
+  void _setLoading(bool loading) {
+    _isLoading = loading;
+    if (loading) {
+      _errorMessage = null;
     }
-
-    // Notify listeners of the state change
     notifyListeners();
   }
 
-  // Alternative method if you want to reset to a specific service
-  void resetBookingForService(String serviceId) {
-    _selectedServiceId = serviceId;
-    _selectedHour = null;
-    _selectedDate = null;
-    _errorMessage = null;
-
-    // Clear previous data
-    _availableHours.clear();
-    _unavailableHours.clear();
-    _groupedHours.clear();
-    _availableDates.clear();
-
-    // Find the service and initialize
-    final selectedService = business.services.firstWhere(
-      (service) => service.id == serviceId,
-      orElse: () => business.services.first,
-    );
-
-    _availableHours = List<String>.from(selectedService.availableHours);
-    _initializeHours(business.availableDays, _availableHours);
-
-    // Fetch new time slots
-    fetchAvailableTimeSlots();
-
-    notifyListeners();
-  }
-
-  void clearError() {
-    _errorMessage = null;
+  void _setError(String error) {
+    _errorMessage = error;
     notifyListeners();
   }
 }

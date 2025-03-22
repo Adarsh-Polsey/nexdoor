@@ -9,6 +9,7 @@ import 'package:nexdoor/features/auth/view/signup_screen.dart';
 import 'package:nexdoor/features/blog/view/discussion_screen.dart';
 import 'package:nexdoor/features/business/repositories/business_repository.dart';
 import 'package:nexdoor/features/business/view/view_businesses_screen.dart';
+import 'package:nexdoor/features/business/viewmodel/business_details_viewmodel.dart';
 import 'package:nexdoor/features/home/view/home_screen.dart';
 import 'package:nexdoor/features/settings_profile/repositories/create_business_repository.dart';
 import 'package:nexdoor/features/settings_profile/repositories/create_service_repository.dart';
@@ -34,23 +35,34 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
-  // Create service instances
-  final apiService = ApiService();
-  
+
+  final ApiService apiService = ApiService();
   runApp(
     MultiProvider(
       providers: [
+        Provider<BusinessRepository>(
+          create: (_) => BusinessRepository(),
+        ),
+        Provider<BookingRepository>(
+          create: (_) => BookingRepository(),
+        ),
+        // ViewModel depends on repositories
+        ChangeNotifierProxyProvider2<BusinessRepository, BookingRepository,
+            BusinessDetailViewModel>(
+          create: (context) => BusinessDetailViewModel(
+            businessRepository: context.read<BusinessRepository>(),
+            bookingRepository: context.read<BookingRepository>(),
+          ),
+          update: (context, businessRepo, bookingRepo, previous) =>
+              previous!..updateRepositories(businessRepo, bookingRepo),
+        ),
         // Singleton Providers
         Provider<ApiService>.value(value: apiService),
-        Provider<BusinessRepository>(
-          create: (context) => BusinessRepository(),
-        ),
         Provider<CreateBusinessRepository>(
-          create: (context) => CreateBusinessRepository(apiService),
+          create: (context) => CreateBusinessRepository(),
         ),
         Provider<CreateServiceRepository>(
-          create: (context) => CreateServiceRepository(apiService),
+          create: (context) => CreateServiceRepository(),
         ),
         ChangeNotifierProvider(
           create: (context) => UserViewModel(),
@@ -61,7 +73,7 @@ void main() async {
           ),
         ),
         ChangeNotifierProvider(
-          create: (context) => ServiceViewModel(CreateServiceRepository(apiService)),
+          create: (context) => ServiceViewModel(CreateServiceRepository()),
         ),
         ChangeNotifierProvider(
           create: (context) => BusinessListViewModel(

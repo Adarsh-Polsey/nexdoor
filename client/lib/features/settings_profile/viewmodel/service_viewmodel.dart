@@ -8,19 +8,19 @@ class ServiceViewModel extends ChangeNotifier {
 
   ServiceViewModel(this._repository);
   // State variables
-  List<ServiceModel> _services = [];
-  ServiceModel? _currentService;
+  List<ServicesModel> _services = [];
+  ServicesModel? _currentService;
   bool _isLoading = false;
   String? _errorMessage;
 
   // Getters
-  List<ServiceModel> get services => _services;
-  ServiceModel? get currentService => _currentService;
+  List<ServicesModel> get services => _services;
+  ServicesModel? get currentService => _currentService;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
    // Get current service
-  Future<ServiceModel?> getUserService({bool forceRefresh = false}) async {
+  Future<ServicesModel?> getUserService({bool forceRefresh = false}) async {
     // If current service is already set and not forcing refresh, return it
     if (_currentService != null && !forceRefresh) {
       return _currentService;
@@ -78,7 +78,7 @@ class ServiceViewModel extends ChangeNotifier {
   }
 
   // Fetch a service by ID
-  Future<ServiceModel?> fetchServiceById(String serviceId) async {
+  Future<ServicesModel?> fetchServiceById(String serviceId) async {
     try {
       _isLoading = true;
       _errorMessage = null;
@@ -88,11 +88,6 @@ class ServiceViewModel extends ChangeNotifier {
       
       if (service != null) {
         _currentService = service;
-        
-        // Add to services list if not already present
-        if (!_services.any((s) => s.id == service.id)) {
-          _services.add(service);
-        }
         
         return _currentService;
       }
@@ -109,7 +104,7 @@ class ServiceViewModel extends ChangeNotifier {
   }
 
   // Create a new service
-  Future<bool> createService(ServiceModel service) async {
+  Future<bool> createService(ServicesModel service) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -136,7 +131,7 @@ class ServiceViewModel extends ChangeNotifier {
   }
 
   // Update an existing service
-  Future<bool> updateService(ServiceModel service) async {
+  Future<bool> updateService(ServicesModel service) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -231,7 +226,7 @@ class ServiceViewModel extends ChangeNotifier {
   }
 
   // Utility methods
-  void setCurrentService(ServiceModel service) {
+  void setCurrentService(ServicesModel service) {
     _currentService = service;
     
     // Add to services list if not already present

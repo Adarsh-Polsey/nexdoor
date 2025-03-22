@@ -262,7 +262,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
           .toList();
 
       // Create service object
-      final service = ServiceModel(
+      final service = ServicesModel(
         id: "", // Backend will generate
         businessId: widget.businessId ?? "", // Use provided business ID or empty
         name: _nameController.text.trim(),

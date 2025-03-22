@@ -1,9 +1,9 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:nexdoor/features/business/view/view_detailed_business.dart';
 import 'package:provider/provider.dart';
 import 'package:nexdoor/common/core/theme/color_pallete.dart';
 import 'package:nexdoor/features/business/repositories/business_repository.dart';
-import 'package:nexdoor/features/business/view/view_detailed_business.dart';
 import 'package:nexdoor/features/business/models/business_model.dart';
 
 class BusinessListViewModel extends ChangeNotifier {
@@ -311,7 +311,7 @@ class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => BusinessDetailsScreen(business: business)
+            builder: (context) => BusinessDetailScreen()
           )
         );
       },

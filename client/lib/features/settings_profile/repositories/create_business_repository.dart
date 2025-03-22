@@ -1,12 +1,9 @@
 import 'dart:developer';
-import 'package:dio/dio.dart';
 import 'package:nexdoor/common/services/api_service.dart';
 import 'package:nexdoor/features/business/models/business_model.dart';
 
 class CreateBusinessRepository {
-  final ApiService _apiService;
-
-  CreateBusinessRepository(this._apiService);
+  final ApiService _apiService=ApiService();
 
   // Fetch user's businesses
   Future<BusinessModel> fetchUserBusiness() async {
@@ -17,7 +14,6 @@ class CreateBusinessRepository {
         return ( BusinessModel.fromJson(response.data));
       }
       else {
-        log('Failed to fetch businesses: ${response.statusCode}');
         throw Exception("Error fetching business");
       };
     } catch (e) {

@@ -100,7 +100,7 @@ class _ChatScreenState extends State<ChatScreen> {
             },
             tooltip: 'Clear chat',
           ),
-        ],
+        ],automaticallyImplyLeading: false,
       ),
       body: Padding(
         padding: const EdgeInsets.only(bottom:100.0, top: 16.0, left: 25.0, right: 25.0),

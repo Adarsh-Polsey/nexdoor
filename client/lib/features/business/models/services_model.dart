@@ -1,47 +1,43 @@
-class ServiceModel {
-  final String id;
+class ServicesModel {
+  final String? id;
   final String name;
   final String description;
-  final double price;
   final int duration;
-  final bool? isActive;
+  final double price;
   final List<String> availableDays;
   final List<String> availableHours;
   final String? businessId;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
+  final bool? isActive;
+  final String? createdAt;
+  final String? updatedAt;
 
-  ServiceModel({
-    required this.id,
+  ServicesModel({
+    this.id,
     required this.name,
     required this.description,
-    required this.price,
     required this.duration,
-    this.isActive,
+    required this.price,
     required this.availableDays,
     required this.availableHours,
     this.businessId,
+    this.isActive,
     this.createdAt,
     this.updatedAt,
   });
 
-  factory ServiceModel.fromJson(Map<String, dynamic> json) {
-    return ServiceModel(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      description: json['description'] ?? '',
-      price: (json['price'] ?? 0).toDouble(),
+  factory ServicesModel.fromJson(Map<String, dynamic> json) {
+    return ServicesModel(
+      id: json['id'] ?? "",
+      name: json['name'] ?? "",
+      description: json['description'] ?? "",
       duration: json['duration'] ?? 0,
-      isActive: json['is_active'] ?? true,
+      price: json['price'].toDouble(),
       availableDays: List<String>.from(json['available_days'] ?? []),
       availableHours: List<String>.from(json['available_hours'] ?? []),
-      businessId: json['business_id'] ?? '',
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
-          : DateTime.now(),
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'])
-          : DateTime.now(),
+      businessId: json['business_id'] ?? "",
+      isActive: json['is_active'] ?? true,
+      createdAt: json['created_at'] ?? "",
+      updatedAt: json['updated_at'] ?? "",
     );
   }
 
@@ -50,14 +46,14 @@ class ServiceModel {
       'id': id,
       'name': name,
       'description': description,
-      'price': price,
       'duration': duration,
-      'is_active': isActive,
+      'price': price,
       'available_days': availableDays,
       'available_hours': availableHours,
       'business_id': businessId,
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
+      'is_active': isActive,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
     };
   }
 }

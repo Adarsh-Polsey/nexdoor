@@ -33,7 +33,6 @@ class BusinessViewModel extends ChangeNotifier {
       }
     } catch (e) {
       _errorMessage = 'Failed to fetch businesses: $e';
-      log(_errorMessage!);
     } finally {
       _isLoading = false;
       notifyListeners();

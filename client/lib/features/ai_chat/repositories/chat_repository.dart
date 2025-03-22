@@ -9,8 +9,8 @@ class ChatRepository {
   Future<Message> sendQuery(String query) async {
     try {
       final Response response = await Dio().get(
-        'http://127.0.0.1:8000/api/v1/chatbot/',
-        queryParameters: {'user_query': query},
+        'http://127.0.0.1:8000/api/v1/chatbot/chat_ai',
+        queryParameters: {'query': query},
       );
       
       // Handle the Response object properly
@@ -30,46 +30,47 @@ class ChatRepository {
         isUser: false,
         status: MessageStatus.delivered,
       );
-    } catch (e) {
+    } catch (e,s) {
       return Message(
-        text: "Sorry, feels like something went wrong. Please try again later.",
+        text: "Sorry, feels like something went wrong. Please try again later. $e $s",
         isUser: false,
         status: MessageStatus.error,
       );
     }
   }
-  
   String _processResponse(Map<String, dynamic> response) {
-    // Rest of the processing logic remains the same
-    if (response.containsKey('results') && 
-        response['results'] is List && 
-        (response['results'] as List).isNotEmpty) {
-      // Handle structured data results
-      final results = response['results'] as List;
-      String text = "Found ${results.length} results:\n";
-      
-      for (var i = 0; i < results.length && i < 5; i++) {
-        text += "${results[i]}\n";
-      }
-      
-      if (results.length > 5) {
-        text += "...and ${results.length - 5} more items";
-      }
-      
-      return text;
-    } else if (response.containsKey('response')) {
-      // Handle text response
-      return response['response'];
-    } else if (response.containsKey('sql_query')) {
-      // Handle SQL query response
-      String text = "SQL Query: ${response['sql_query']}\n\n";
-      if (response.containsKey('results')) {
-        text += "Results: ${response['results']}";
-      }
-      return text;
-    } else {
-      // Fallback
-      return "Received response: $response";
+  if (response.containsKey('answer')) {
+    // Handle answer response
+    return response['answer'];
+  } else if (response.containsKey('results') && 
+      response['results'] is List && 
+      (response['results'] as List).isNotEmpty) {
+    // Handle structured data results
+    final results = response['results'] as List;
+    String text = "Found ${results.length} results:\n";
+    
+    for (var i = 0; i < results.length && i < 5; i++) {
+      text += "${results[i]}\n";
     }
+    
+    if (results.length > 5) {
+      text += "...and ${results.length - 5} more items";
+    }
+    
+    return text;
+  } else if (response.containsKey('response')) {
+    // Handle text response
+    return response['response'];
+  } else if (response.containsKey('sql_query')) {
+    // Handle SQL query response
+    String text = "SQL Query: ${response['sql_query']}\n\n";
+    if (response.containsKey('results')) {
+      text += "Results: ${response['results']}";
+    }
+    return text;
+  } else {
+    // Fallback
+    return "Received response: $response";
   }
+}
 }

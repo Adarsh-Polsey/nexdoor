@@ -3,18 +3,18 @@ import 'package:nexdoor/common/services/api_service.dart';
 import 'package:nexdoor/features/business/models/services_model.dart';
 
 class CreateServiceRepository {
-  final ApiService _apiService;
+  final ApiService _apiService=ApiService();
 
-  CreateServiceRepository(this._apiService);
+  CreateServiceRepository();
 
-   Future<ServiceModel> fetchUserService() async {
+   Future<ServicesModel> fetchUserService() async {
     try {
       final response = await _apiService.getData(
         '/services/get_service',
       );
 
       if (response.statusCode == 200) {
-        return (ServiceModel.fromJson(response.data));
+        return (ServicesModel.fromJson(response.data));
       }
       
       log('Failed to fetch services: ${response.statusCode}');
@@ -26,7 +26,7 @@ class CreateServiceRepository {
   }
 
   // Fetch services for a specific business
-  Future<List<ServiceModel>> fetchBusinessServices(String businessId) async {
+  Future<List<ServicesModel>> fetchBusinessServices(String businessId) async {
     try {
       final response = await _apiService.getData(
         '/services/list_services',
@@ -35,7 +35,7 @@ class CreateServiceRepository {
 
       if (response.statusCode == 200) {
         return (response.data as List)
-            .map((json) => ServiceModel.fromJson(json))
+            .map((json) => ServicesModel.fromJson(json))
             .toList();
       }
       
@@ -48,7 +48,7 @@ class CreateServiceRepository {
   }
 
   // Get a specific service by ID
-  Future<ServiceModel?> getServiceById(String serviceId) async {
+  Future<ServicesModel?> getServiceById(String serviceId) async {
     try {
       final response = await _apiService.getData(
         '/services/get_service',
@@ -56,7 +56,7 @@ class CreateServiceRepository {
       );
 
       if (response.statusCode == 200) {
-        return ServiceModel.fromJson(response.data);
+        return ServicesModel.fromJson(response.data);
       }
       
       log('Failed to fetch service: ${response.statusCode}');
@@ -68,7 +68,7 @@ class CreateServiceRepository {
   }
 
   // Create a new service
-  Future<ServiceModel?> createService(ServiceModel service) async {
+  Future<ServicesModel?> createService(ServicesModel service) async {
     try {
       final response = await _apiService.postData(
         '/services/create_service',
@@ -76,7 +76,7 @@ class CreateServiceRepository {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return ServiceModel.fromJson(response.data);
+        return ServicesModel.fromJson(response.data);
       }
       
       log('Failed to create service: ${response.statusCode}');
@@ -88,7 +88,7 @@ class CreateServiceRepository {
   }
 
   // Update an existing service
-  Future<ServiceModel?> updateService(ServiceModel service) async {
+  Future<ServicesModel?> updateService(ServicesModel service) async {
     try {
       final response = await _apiService.putData(
         '/services/update_service/${service.id}',
@@ -96,7 +96,7 @@ class CreateServiceRepository {
       );
 
       if (response.statusCode == 200) {
-        return ServiceModel.fromJson(response.data);
+        return ServicesModel.fromJson(response.data);
       }
       
       log('Failed to update service: ${response.statusCode}');
@@ -122,7 +122,7 @@ class CreateServiceRepository {
   }
 
   // Search services
-  Future<List<ServiceModel>> searchServices({
+  Future<List<ServicesModel>> searchServices({
     String? query,
     String? businessId,
   }) async {
@@ -137,7 +137,7 @@ class CreateServiceRepository {
 
       if (response.statusCode == 200) {
         return (response.data as List)
-            .map((json) => ServiceModel.fromJson(json))
+            .map((json) => ServicesModel.fromJson(json))
             .toList();
       }
       

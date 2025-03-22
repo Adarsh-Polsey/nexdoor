@@ -24,7 +24,7 @@ class _ManageServiceScreenState extends State<ManageServiceScreen> {
 
   bool _isLoading = true;
   bool _isUpdating = false;
-  ServiceModel? _currentService;
+  ServicesModel? _currentService;
 
   // Time slots for each day
   final Map<String, Map<String, bool>> _availability = {
@@ -59,7 +59,7 @@ class _ManageServiceScreenState extends State<ManageServiceScreen> {
         Provider.of<ServiceViewModel>(context, listen: false);
 
     try {
-      ServiceModel? service;
+      ServicesModel? service;
       service = await serviceViewModel.getUserService();
       if(service!=null){
       _populateFormFields(service);
@@ -83,7 +83,7 @@ class _ManageServiceScreenState extends State<ManageServiceScreen> {
     }
   }
 
-  void _populateFormFields(ServiceModel service) {
+  void _populateFormFields(ServicesModel service) {
     _nameController.text = service.name;
     _descriptionController.text = service.description;
     _durationController.text = service.duration.toString();
@@ -414,14 +414,14 @@ class _ManageServiceScreenState extends State<ManageServiceScreen> {
         }
 
         // Create updated service object
-        final updatedService = ServiceModel(
+        final updatedService = ServicesModel(
           id: _currentService!.id,
           name: _nameController.text,
           description: _descriptionController.text,
           duration: int.parse(_durationController.text),
           price: double.parse(_priceController.text),
           availableDays: availableDays,
-          availableHours: schedule.values.expand((hours) => hours).toList(),
+          availableHours: schedule.values.expand((hours) => hours).toList(), businessId: '',
         );
 
         // Update via ViewModel
