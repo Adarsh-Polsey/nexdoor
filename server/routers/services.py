@@ -1,4 +1,5 @@
 from datetime import datetime
+import traceback
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
@@ -69,8 +70,8 @@ def list_services(
         raise HTTPException(status_code=500, detail={ "message": "Failed to list services"})
 
 # ✅ Get Service by ID
-@router.get("/get_service/{service_id}", response_model=schemas.Service)
-@router.get("/get_service", response_model=schemas.Service)  # Return a list of services
+@router.get("/get_service/{service_id}")
+@router.get("/get_service")  # Return a list of services
 def get_service(
     service_id: Optional[str] = None, 
     db: Session = Depends(get_db),
@@ -83,29 +84,33 @@ def get_service(
                 raise HTTPException(status_code=404, detail="Service not found")
             return service
 
-        services = db.query(models.Service).filter(models.Service.owner_id == user.uid).first()
+        services = db.query(models.Service).filter(models.Service.owner_id == user.uid).all()  # Fixed here
 
         if not services:
             raise HTTPException(status_code=404, detail="No services found for the current user")
 
-        return services 
+        return services
     except Exception as e:
-        raise HTTPException(status_code=500, detail={ "message": "Failed to get service"})
+        raise HTTPException(status_code=500, detail={"message": "Failed to get service", "error": str(e)})
 
 # ✅ Update Service (Only Business Owners)
-@router.put("/update_service", response_model=schemas.Service)
+@router.put("/update_service/")
 def update_service(
     service_update: schemas.ServiceCreate,
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user)
 ):
     try:
-        db_service = db.query(models.Service).filter(models.Service.owner_id == user.uid).first()
+        # Fetch the specific service owned by the user
+        db_service = db.query(models.Service).filter( models.Service.owner_id == user.uid  # Ensure user is the owner
+        ).first()
 
         if not db_service:
-            raise HTTPException(status_code=404, detail=f" Service not found - user.uid: {user.uid} owner_id: {business_update.owner_id}")
+            raise HTTPException(status_code=404, detail=f"Service not found - user.uid: {user.uid}, service_id: {service_id}")
 
-        for key, value in service_update.model_dump().items():
+        # Update only the fields that are provided
+        update_data = service_update.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
             setattr(db_service, key, value)
 
         db.commit()
@@ -113,8 +118,8 @@ def update_service(
         return db_service
 
     except Exception as e:
-        print("Error: "+str(e.__traceback__.tb_lineno)+" "+str(e))
-        raise HTTPException(status_code=500, detail={ "message": "Failed to update service"})
+        print(f"Error on line {e.__traceback__.tb_lineno}: {e}")
+        raise HTTPException(status_code=500, detail={"message": "Failed to update service"})
 
 # ✅ Delete Service (Only Business Owners)
 @router.delete("/delete_service/{service_id}", status_code=204)

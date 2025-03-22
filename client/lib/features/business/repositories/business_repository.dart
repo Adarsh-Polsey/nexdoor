@@ -1,6 +1,4 @@
 import 'dart:developer';
-
-import 'package:dio/dio.dart';
 import 'package:nexdoor/common/services/api_service.dart';
 import 'package:nexdoor/features/business/models/booking_model.dart';
 import 'package:nexdoor/features/business/models/business_model.dart';
@@ -27,12 +25,20 @@ class BusinessRepository {
     }
   }
 
-  Future<BusinessModel> getBusinessDetails() async {
+  Future<BusinessModel> getBusinessDetails(String? id) async {
     try{
+      if(id!=null){
+        final response = await apiService.getData(
+        "/businesses/get_business/$id",
+      );
+      return BusinessModel.fromJson(response.data);
+      }else{
       final response = await apiService.getData(
         "/businesses/get_business/",
-      );      
+      ); 
       return BusinessModel.fromJson(response.data);}
+       }
+          
       catch(e,s){
         log("Error fetching business details: $e $s", error: e);
         rethrow;
@@ -53,7 +59,7 @@ class BookingRepository {
       data: booking.toJson(),
     );
     
-    return BookingModel.fromJson(response);
+    return BookingModel.fromJson(response.data);
   }
 
   Future<List<BookingModel>> getBusinessBookings(String businessId, String date) async {

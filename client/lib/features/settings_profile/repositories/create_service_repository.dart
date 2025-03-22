@@ -7,24 +7,26 @@ class CreateServiceRepository {
 
   CreateServiceRepository();
 
-   Future<ServicesModel> fetchUserService() async {
-    try {
-      final response = await _apiService.getData(
-        '/services/get_service',
-      );
+  Future<ServicesModel> fetchUserService() async {
+  try {
+    final response = await _apiService.getData('/services/get_service');
 
-      if (response.statusCode == 200) {
-        return (ServicesModel.fromJson(response.data));
+    if (response.statusCode == 200) {
+      List<dynamic> data = response.data; // Ensure it's treated as a list
+      if (data.isNotEmpty) {
+        return ServicesModel.fromJson(data.first); // Get the first service
+      } else {
+        throw Exception("No services found");
       }
-      
-      log('Failed to fetch services: ${response.statusCode}');
-      throw Exception("Error fetching services");
-    } catch (e) {
-      log('Error fetching services: $e');
-      rethrow;
     }
+    
+    log('Failed to fetch services: ${response.statusCode}');
+    throw Exception("Error fetching services");
+  } catch (e) {
+    log('Error fetching services: $e');
+    rethrow;
   }
-
+}
   // Fetch services for a specific business
   Future<List<ServicesModel>> fetchBusinessServices(String businessId) async {
     try {
@@ -91,7 +93,7 @@ class CreateServiceRepository {
   Future<ServicesModel?> updateService(ServicesModel service) async {
     try {
       final response = await _apiService.putData(
-        '/services/update_service/${service.id}',
+        '/services/update_service/',
         data: service.toJson(),
       );
 

@@ -21,21 +21,15 @@ class ServiceViewModel extends ChangeNotifier {
 
    // Get current service
   Future<ServicesModel?> getUserService({bool forceRefresh = false}) async {
-    // If current service is already set and not forcing refresh, return it
-    if (_currentService != null && !forceRefresh) {
-      return _currentService;
-    }
 
     try {
       _isLoading = true;
       _errorMessage = null;
       notifyListeners();
 
-      _currentService ??= await _repository.fetchUserService();
-
-      // If services exist, set the first one as current
-      if (_services.isNotEmpty) {
-        _currentService = _services.first;
+      _currentService = await _repository.fetchUserService();
+      
+      if (_currentService != null) {
         return _currentService;
       }
 

@@ -39,10 +39,10 @@ class BusinessDetailViewModel extends ChangeNotifier {
     // This method allows the Provider to update the repositories if they change
   }
 
-  Future<void> loadBusinessDetails() async {
+  Future<void> loadBusinessDetails(String? id) async {
     _setLoading(true);
     try {
-      _business = await _businessRepository.getBusinessDetails();
+      _business = await _businessRepository.getBusinessDetails(id);
       notifyListeners();
     } catch (e) {
       _setError('Failed to load business details: $e');

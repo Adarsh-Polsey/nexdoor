@@ -16,7 +16,6 @@ class ChatRepository {
       // Handle the Response object properly
       final Map<String, dynamic> data;
       if (response.statusCode==200) {
-        log("Response: ${response.data}");
         // If using Dio
         data = response.data;
       } else {
@@ -24,7 +23,7 @@ class ChatRepository {
       }
       
       String processedResponse = _processResponse(data);
-      
+      log("processedResponse: $processedResponse");
       return Message(
         text: processedResponse,
         isUser: false,
@@ -57,7 +56,8 @@ class ChatRepository {
       text += "...and ${results.length - 5} more items";
     }
     
-    return text;
+      String cleanText = text.replaceAll('*', '');
+      return cleanText;
   } else if (response.containsKey('response')) {
     // Handle text response
     return response['response'];

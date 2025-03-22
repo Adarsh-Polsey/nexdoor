@@ -15,7 +15,7 @@ class CreateBusinessRepository {
       }
       else {
         throw Exception("Error fetching business");
-      };
+      }
     } catch (e) {
       log('Error fetching businesses: $e');
       rethrow;
@@ -73,7 +73,7 @@ class CreateBusinessRepository {
       );
 
       if (response!= null) {
-        return BusinessModel.fromJson(response);
+        return BusinessModel.fromJson(response.data);
       }
       
       log('Failed to update business: ${response.statusCode}');

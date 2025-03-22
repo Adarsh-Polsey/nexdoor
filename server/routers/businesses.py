@@ -133,8 +133,29 @@ def update_business(
         business_data=business_update.model_dump(exclude_unset=True)
         for key, value in business_data.items():
             if hasattr(db_business, key):
-                setattr(db_business, key, value)
+                attr = getattr(db_business, key)
 
+                # Handling relationships like `services`
+                if key == "services" and isinstance(value, list):
+                    new_services = []
+                    for service_data in value:
+                        if "id" in service_data:  
+                            # Existing service, fetch and update
+                            service = db.query(models.Service).filter_by(id=service_data["id"]).first()
+                            if service:
+                                for s_key, s_value in service_data.items():
+                                    setattr(service, s_key, s_value)
+                            new_services.append(service)
+                        else:
+                            # New service, create an instance
+                            new_service = models.Service(**service_data)
+                            db.add(new_service)
+                            db.flush()  # Ensure ID is assigned before appending
+                            new_services.append(new_service)
+
+                    setattr(db_business, key, new_services)  # Assign updated service list
+                else:
+                    setattr(db_business, key, value)
         db.commit()
         db.refresh(db_business)
         return db_business

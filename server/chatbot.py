@@ -110,7 +110,8 @@ def retrieve_data_from_db(query: str, db: Session) -> Optional[Dict[str, Any]]:
     """Retrieve data from the database."""
     try:
         # Get an sql query prompt
-        sql_prompt = create_sql_query(query)
+        # sql_prompt = create_sql_query(query)
+        sql_prompt = "SELECT * FROM businesses"
         # calling gemini for sqlquery
         gemini_response = call_gemini_api(API_KEY, sql_prompt)
         print("🛑", gemini_response)
@@ -125,7 +126,8 @@ def retrieve_data_from_db(query: str, db: Session) -> Optional[Dict[str, Any]]:
                 sql_query = re.sub(r'```sql\n|\n```', '', sql_text).strip()
                 
                 # Use SQLAlchemy's text() function to create a SQL expression
-                sql_expression = text(sql_query)
+                # sql_expression = text(sql_query)
+                sql_expression = text(sql_prompt)
                 
                 # Execute the query
                 result = db.execute(sql_expression)

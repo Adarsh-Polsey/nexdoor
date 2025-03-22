@@ -6,8 +6,9 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class BusinessDetailScreen extends StatefulWidget {
+  final String id;
 
-  const BusinessDetailScreen({super.key});
+  const BusinessDetailScreen({super.key, required this.id});
 
   @override
   _BusinessDetailScreenState createState() => _BusinessDetailScreenState();
@@ -22,7 +23,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
     // Load business details when the screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<BusinessDetailViewModel>(context, listen: false)
-          .loadBusinessDetails();
+          .loadBusinessDetails(widget.id);
     });
   }
 

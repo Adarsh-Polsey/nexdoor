@@ -311,7 +311,7 @@ class _ViewBusinessScreenState extends State<ViewBusinessScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => BusinessDetailScreen()
+            builder: (context) => BusinessDetailScreen(id:business.id??"")
           )
         );
       },
